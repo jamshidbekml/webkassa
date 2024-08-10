@@ -16,7 +16,7 @@ export class DidoxService {
       data: data.data,
       pageCount,
       currentPage: page,
-      total: data.total,
+      total: data?.total,
     };
   }
 
