@@ -1,19 +1,19 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
+  // Post,
+  // Body,
+  // Patch,
+  // Param,
+  // Delete,
   Query,
 } from '@nestjs/common';
 import { BranchesService } from './branches.service';
-import { CreateBranchDto } from './dto/create-branch.dto';
-import { UpdateBranchDto } from './dto/update-branch.dto';
+// import { CreateBranchDto } from './dto/create-branch.dto';
+// import { UpdateBranchDto } from './dto/update-branch.dto';
 import {
   ApiBearerAuth,
-  ApiBody,
+  // ApiBody,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -37,7 +37,7 @@ export class BranchesController {
   @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
   @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
   findAll(@Query('page') page = 1, @Query('limit') limit = 10) {
-    return this.branchesService.findAll(page, limit);
+    return this.branchesService.findAll(+page, +limit);
   }
 
   // @Get(':id')

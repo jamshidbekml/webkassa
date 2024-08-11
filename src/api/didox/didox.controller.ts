@@ -42,4 +42,16 @@ export class DidoxController {
       throw new BadRequestException('Foydalanuvchu mchj raqami mavjud emas!');
     return this.didoxService.findOneDocument(obj.inn, doc_id);
   }
+
+  @Get('fetch-products/:doc_id')
+  @ApiOperation({ summary: 'Fetch products' })
+  @ApiParam({ name: 'doc_id', type: String })
+  async createProducts(@Req() req: Request, @Param('doc_id') doc_id: string) {
+    const obj = req['user'] as { inn: string };
+    if (!obj?.inn)
+      throw new BadRequestException('Foydalanuvchu mchj raqami mavjud emas!');
+    await this.didoxService.createProducts(obj.inn, doc_id);
+
+    return 'Products created successfully';
+  }
 }

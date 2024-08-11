@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+// import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -14,19 +14,68 @@ export class ProductsService {
     return newProduct;
   }
 
-  findAll() {
-    return `This action returns all products`;
+  async findAll(
+    page: number,
+    limit: number,
+    branchId: string,
+    search?: string,
+    categoryId?: string,
+    label?: string,
+  ) {
+    const total = await this.prismaService.products.count({
+      where: {
+        branchId,
+        ...(search && {
+          name: { contains: search, mode: 'insensitive' },
+        }),
+        ...(categoryId && { categoryId }),
+        ...(label && {
+          labels: {
+            some: {
+              label: { contains: label, mode: 'insensitive' },
+            },
+          },
+        }),
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    const products = await this.prismaService.products.findMany({
+      where: {
+        branchId,
+        ...(search && {
+          name: { contains: search, mode: 'insensitive' },
+        }),
+        ...(categoryId && { categoryId }),
+        ...(label && {
+          labels: {
+            some: {
+              label: { contains: label, mode: 'insensitive' },
+            },
+          },
+        }),
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      data: products,
+      total,
+      page: Math.ceil(total / limit),
+      currentPage: page,
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
-  }
+  // findOne(id: number) {
+  //   return `This action returns a #${id} product`;
+  // }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
-  }
+  // update(id: number, updateProductDto: UpdateProductDto) {
+  //   return `This action updates a #${id} product`;
+  // }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
-  }
+  // remove(id: number) {
+  //   return `This action removes a #${id} product`;
+  // }
 }

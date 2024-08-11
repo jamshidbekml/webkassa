@@ -1,5 +1,5 @@
 export class CreateCategoryDto {
-  catalogcode: string;
-  catalogname: string;
+  code: string;
+  name: string;
   branchId: string;
 }

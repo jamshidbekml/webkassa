@@ -3,9 +3,10 @@ export class CreateProductDto {
   barcode: string;
   packagecode: string;
   vat: number;
-  amount: number;
-  discountAmount: number;
+  amount?: number;
+  discountAmount?: number;
   count: number;
   branchId: string;
   categoryId: string;
+  catalogcode: string;
 }
