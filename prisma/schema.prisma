@@ -17,6 +17,12 @@ enum ROLE {
   superadmin
   cashier
   accountant
+} 
+
+enum PAYMENT_TYPE {
+  cash
+  card
+  cashless
 }
 
 model Users {
@@ -44,7 +50,6 @@ model Branches {
   catogries Categories[]
   products Products[]
   contracts Contracts[]
-  receipts Receipts[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -82,6 +87,7 @@ model Products {
   categoryId String @db.Uuid
   category Categories @relation(fields: [categoryId], references: [id])
   labels ProductMarks[]
+  receipts Receipts[]
 
   @@map("products")
   @@index([branchId, name, categoryId])
@@ -106,18 +112,23 @@ model Contracts {
   pinfl String
   branchId String @db.Uuid @unique
   branch Branches @relation(fields: [branchId], references: [id])
+  receipts Receipts[]
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now())  
   updatedAt DateTime @updatedAt
   @@map("contracts")
 }
 
 model Receipts {
   id String @id @default(uuid()) @db.Uuid
-
-  branchId String @db.Uuid @unique
-  branch Branches @relation(fields: [branchId], references: [id])
-
+  paymentType PAYMENT_TYPE
+  saleId String
+  amount Int
+  productId String
+  product Products @relation(fields: [productId], references: [id])
+  label String?
+  contractId String
+  contract Contracts @relation(fields: [contractId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("receipts")

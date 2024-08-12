@@ -12,6 +12,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { TaskModule } from './task/task.module';
 import { DidoxModule } from './didox/didox.module';
+import { ContractsModule } from './contracts/contracts.module';
+import { ReceiptsModule } from './receipts/receipts.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { DidoxModule } from './didox/didox.module';
     PrismaModule,
     TaskModule,
     DidoxModule,
+    ContractsModule,
+    ReceiptsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: AccessTokenGuard },
