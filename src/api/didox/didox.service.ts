@@ -15,12 +15,12 @@ export class DidoxService {
   async findAllDocuments(page: number, inn: string) {
     const data = await getDidoxDocuments(inn, page);
 
-    const pageCount = Math.ceil(data?.total / 15);
+    const pageSize = Math.ceil(data?.total / 15);
 
     return {
       data: data.data,
-      pageCount,
-      currentPage: page,
+      pageSize,
+      current: page,
       total: data?.total,
     };
   }

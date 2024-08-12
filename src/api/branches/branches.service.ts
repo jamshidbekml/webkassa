@@ -18,8 +18,8 @@ export class BranchesService {
     });
     return {
       data,
-      pageCount: Math.ceil(count / limit),
-      currentPage: page,
+      pageSize: Math.ceil(count / limit),
+      current: page,
       total: count,
     };
   }

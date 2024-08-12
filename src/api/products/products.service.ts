@@ -62,8 +62,8 @@ export class ProductsService {
     return {
       data: products,
       total,
-      page: Math.ceil(total / limit),
-      currentPage: page,
+      pageSize: Math.ceil(total / limit),
+      current: page,
     };
   }
 
