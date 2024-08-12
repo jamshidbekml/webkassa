@@ -40,18 +40,12 @@ export class GetMeDto {
 
   @Expose()
   @Transform(
-    ({ value }) =>
-      value
-        ? value.map((ub) => {
-            return {
-              id: ub.branch.id,
-              name: ub.branch.name,
-            };
-          })
-        : [],
+    ({ value }) => {
+      return { id: value.id, name: value.name };
+    },
     {
       toClassOnly: true,
     },
   )
-  branches: any;
+  branch: any;
 }
