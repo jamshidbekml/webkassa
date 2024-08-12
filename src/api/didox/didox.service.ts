@@ -15,8 +15,6 @@ export class DidoxService {
   async findAllDocuments(page: number, inn: string) {
     const data = await getDidoxDocuments(inn, page);
 
-    console.log(data);
-
     const pageCount = Math.ceil(data?.total / 15);
 
     return {

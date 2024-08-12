@@ -6,6 +6,7 @@ export async function getDidoxDocuments(inn: string, page: number) {
   try {
     const configService = new ConfigService();
     const user_key = configService.get(inn);
+
     const partnet_token = configService.get('DIDOX_TOKEN');
 
     const data = await axios.get<GetAllDocumentsFromDidox>(
