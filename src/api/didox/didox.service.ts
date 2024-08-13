@@ -13,13 +13,11 @@ export class DidoxService {
     private readonly prismaService: PrismaService,
   ) {}
   async findAllDocuments(page: number, inn: string) {
-    const data = await getDidoxDocuments(inn, page);
-
-    const pageSize = Math.ceil(data?.total / 15);
+    const data = await getDidoxDocuments(inn, page)
 
     return {
       data: data.data,
-      pageSize,
+      pageSize: 20,
       current: page,
       total: data?.total,
     };

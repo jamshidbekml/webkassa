@@ -30,7 +30,7 @@ export class DidoxController {
 
     if (!obj?.inn)
       throw new BadRequestException('Foydalanuvchu mchj raqami mavjud emas!');
-    return this.didoxService.findAllDocuments(page, obj.inn);
+    return this.didoxService.findAllDocuments(+page, obj.inn);
   }
 
   @Get(':doc_id')

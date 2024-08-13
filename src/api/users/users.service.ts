@@ -180,7 +180,7 @@ export class UsersService {
 
     return {
       data: users,
-      pageSize: Math.ceil(total / limit),
+      pageSize: limit,
       current: page,
       total,
     };

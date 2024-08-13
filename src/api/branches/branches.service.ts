@@ -18,7 +18,7 @@ export class BranchesService {
     });
     return {
       data,
-      pageSize: Math.ceil(count / limit),
+      pageSize: limit,
       current: page,
       total: count,
     };

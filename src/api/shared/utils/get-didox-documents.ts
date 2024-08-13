@@ -12,7 +12,7 @@ export async function getDidoxDocuments(inn: string, page: number) {
     console.log(partnet_token);
 
     const data = await axios.get<GetAllDocumentsFromDidox>(
-      `https://api-partners.didox.uz/v2/documents?owner=0&limit=${15}&page=${page}`,
+      `https://api-partners.didox.uz/v2/documents?owner=0&limit=20&page=${page}`,
       {
         headers: {
           'user-key': user_key,

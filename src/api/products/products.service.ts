@@ -62,7 +62,7 @@ export class ProductsService {
     return {
       data: products,
       total,
-      pageSize: Math.ceil(total / limit),
+      pageSize: limit,
       current: page,
     };
   }
