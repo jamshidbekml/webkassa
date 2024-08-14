@@ -14,10 +14,12 @@ import { TaskModule } from './task/task.module';
 import { DidoxModule } from './didox/didox.module';
 import { ContractsModule } from './contracts/contracts.module';
 import { ReceiptsModule } from './receipts/receipts.module';
+import { ScheduleModule } from "@nestjs/schedule";
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+    ScheduleModule.forRoot(),
     AuthModule,
     BranchesModule,
     ProductsModule,

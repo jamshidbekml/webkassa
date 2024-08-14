@@ -13,7 +13,7 @@ export class DidoxService {
     private readonly prismaService: PrismaService,
   ) {}
   async findAllDocuments(page: number, inn: string) {
-    const data = await getDidoxDocuments(inn, page)
+    const data = await getDidoxDocuments(inn, page);
 
     return {
       data: data.data,

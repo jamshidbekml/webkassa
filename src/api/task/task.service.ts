@@ -12,7 +12,7 @@ export class TaskService implements OnModuleInit {
     this.tokenUpdater();
   }
 
-  @Cron(CronExpression.EVERY_5_HOURS)
+  @Cron(CronExpression.EVERY_3_HOURS)
   async tokenUpdater() {
     try {
       const warehouses = await this.prismaService.branches.findMany();
@@ -23,6 +23,8 @@ export class TaskService implements OnModuleInit {
 
         tokens[warehouse.inn] = token;
       }
+
+      console.log(tokens);
 
       const envFilePath = join(__dirname, '..', '..', '..', '..', '.env');
 
