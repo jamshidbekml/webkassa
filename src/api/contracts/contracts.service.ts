@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateContractDto } from './dto/create-contract.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -6,10 +10,14 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ContractsService {
   constructor(private readonly prismaService: PrismaService) {}
   async create(createContractDto: CreateContractDto, branchId: string) {
+    const isExist = await this.prismaService.contracts.findUnique({
+      where: { contractId: createContractDto.contractId },
+    });
+    if (isExist) throw new BadRequestException('Bunday shartnoma mavjud');
     const newContract = await this.prismaService.contracts.create({
       data: {
         branchId,
-        contractId: createContractDto.contractid,
+        contractId: createContractDto.contractId,
         phone: createContractDto.phone,
         pinfl: createContractDto.pinfl,
         passportSeries: createContractDto.passportSeries,
@@ -38,7 +46,11 @@ export class ContractsService {
         }
       }
     }
+
+    return 'Shartnoma yaratildi!';
   }
+
+  async getContractProducts(contractId: string) {}
 
   async findAll(branchId: string, page: number, limit: number, search: string) {
     const total = await this.prismaService.contracts.count({
@@ -104,13 +116,15 @@ export class ContractsService {
             amount: true,
             count: true,
             discountAmount: true,
+            labels: { select: { label: true } },
           },
-          include: { labels: true },
         },
       },
     });
 
     if (!contract) throw new NotFoundException('Shartnoma topilmadi');
+
+    return { data: contract };
   }
 
   async update(id: string, saleId: string) {
