@@ -1,26 +1,145 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateContractDto } from './dto/create-contract.dto';
-import { UpdateContractDto } from './dto/update-contract.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ContractsService {
-  create(createContractDto: CreateContractDto) {
-    return 'This action adds a new contract';
+  constructor(private readonly prismaService: PrismaService) {}
+  async create(createContractDto: CreateContractDto, branchId: string) {
+    const newContract = await this.prismaService.contracts.create({
+      data: {
+        branchId,
+        contractId: createContractDto.contractid,
+        phone: createContractDto.phone,
+        pinfl: createContractDto.pinfl,
+        passportSeries: createContractDto.passportSeries,
+      },
+    });
+
+    for await (const product of createContractDto.products) {
+      const contractProduct = await this.prismaService.contractProducts.create({
+        data: {
+          contractId: newContract.id,
+          productId: product.productId,
+          amount: product.amount,
+          discountAmount: product.discountAmount,
+          count: product.count,
+        },
+      });
+
+      if (product?.labels) {
+        for await (const label of product.labels) {
+          await this.prismaService.contractProductLabels.create({
+            data: {
+              contractProductId: contractProduct.id,
+              label,
+            },
+          });
+        }
+      }
+    }
   }
 
-  findAll() {
-    return `This action returns all contracts`;
+  async findAll(branchId: string, page: number, limit: number, search: string) {
+    const total = await this.prismaService.contracts.count({
+      where: {
+        branchId,
+        ...(search
+          ? {
+              OR: [
+                { phone: { contains: search, mode: 'insensitive' } },
+                { contractId: { contains: search, mode: 'insensitive' } },
+                {
+                  pinfl: { contains: search, mode: 'insensitive' },
+                },
+                {
+                  passportSeries: { contains: search, mode: 'insensitive' },
+                },
+              ],
+            }
+          : {}),
+      },
+    });
+
+    const contracts = await this.prismaService.contracts.findMany({
+      where: {
+        branchId,
+        ...(search
+          ? {
+              OR: [
+                { phone: { contains: search, mode: 'insensitive' } },
+                { contractId: { contains: search, mode: 'insensitive' } },
+                {
+                  pinfl: { contains: search, mode: 'insensitive' },
+                },
+                {
+                  passportSeries: { contains: search, mode: 'insensitive' },
+                },
+              ],
+            }
+          : {}),
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return { data: contracts, pageSize: limit, total, current: page };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} contract`;
+  async findOne(id: string) {
+    const contract = await this.prismaService.contracts.findUnique({
+      where: { id },
+      include: {
+        products: {
+          select: {
+            product: {
+              select: {
+                barcode: true,
+                catalogcode: true,
+                name: true,
+                packagecode: true,
+                vat: true,
+              },
+            },
+            amount: true,
+            count: true,
+            discountAmount: true,
+          },
+          include: { labels: true },
+        },
+      },
+    });
+
+    if (!contract) throw new NotFoundException('Shartnoma topilmadi');
   }
 
-  update(id: number, updateContractDto: UpdateContractDto) {
-    return `This action updates a #${id} contract`;
+  async update(id: string, saleId: string) {
+    const contract = await this.prismaService.contracts.findUnique({
+      where: { id },
+    });
+
+    if (!contract) throw new NotFoundException('Shartnoma topilmadi');
+
+    return await this.prismaService.contracts.update({
+      where: { id: contract.id },
+      data: {
+        saleId,
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} contract`;
+  async remove(id: string) {
+    const contract = await this.prismaService.contracts.findUnique({
+      where: { id },
+    });
+
+    if (contract.saleId)
+      throw new NotFoundException(
+        "Shartnomaga to'lov qilingan, o'chirish mumkin emas",
+      );
+
+    await this.prismaService.contracts.delete({ where: { id } });
+
+    return "Shartnoma muvaffaqqiyatli o'chirildi";
   }
 }

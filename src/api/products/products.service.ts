@@ -38,9 +38,8 @@ export class ProductsService {
           },
         }),
       },
-      skip: (page - 1) * limit,
-      take: limit,
     });
+
     const products = await this.prismaService.products.findMany({
       include: {
         labels: {

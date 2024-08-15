@@ -1,34 +1,46 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Req,
+  Query,
+} from '@nestjs/common';
 import { ContractsService } from './contracts.service';
 import { CreateContractDto } from './dto/create-contract.dto';
-import { UpdateContractDto } from './dto/update-contract.dto';
+import { Request } from 'express';
+import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('contracts')
 export class ContractsController {
   constructor(private readonly contractsService: ContractsService) {}
 
   @Post()
-  create(@Body() createContractDto: CreateContractDto) {
-    return this.contractsService.create(createContractDto);
+  create(@Req() req: Request, @Body() createContractDto: CreateContractDto) {
+    const { branchId } = req['user'] as { branchId: string };
+    return this.contractsService.create(createContractDto, branchId);
   }
 
   @Get()
-  findAll() {
-    return this.contractsService.findAll();
+  findAll(
+    @Req() req: Request,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('search') search?: string,
+  ) {
+    const { branchId } = req['user'] as { branchId: string };
+    return this.contractsService.findAll(branchId, page, limit, search);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.contractsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateContractDto: UpdateContractDto) {
-    return this.contractsService.update(+id, updateContractDto);
+    return this.contractsService.findOne(id);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.contractsService.remove(+id);
+    return this.contractsService.remove(id);
   }
 }
