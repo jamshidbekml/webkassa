@@ -1,10 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import 'colors';
+import { ConfigService } from '@nestjs/config';
 
+const configService = new ConfigService();
 const filiallar = [
   {
-    inn: '311020483',
-    password: 'A123456a',
+    inn: configService.get('BRANCH_INN'),
+    password: configService.get('BRANCH_PASSWORD'),
     name: '"QUVASOY MARKET CITY" MCHJ',
   },
 ];

@@ -20,7 +20,7 @@ async function bootstrap() {
   app.use(
     [`/${apiPrefix}/docs`],
     basicAuth({
-      users: { jamshidbek: 'jamadev' },
+      users: { munis: `${config.get('SWAGGER_PASSWORD')}` },
       challenge: true,
     }),
   );
