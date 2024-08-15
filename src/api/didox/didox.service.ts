@@ -68,11 +68,11 @@ export class DidoxService {
           },
         });
       }
-      const existProduct = await this.prismaService.products.findUnique({
+      const existProduct = await this.prismaService.products.findFirst({
         where: { name: product.name },
       });
 
-      if (existProduct) {
+      if (existProduct && existProduct.name == product.name) {
         await this.prismaService.products.update({
           where: { id: existProduct.id },
           data: { count: existProduct.count + Number(product.count) },

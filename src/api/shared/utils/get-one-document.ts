@@ -6,7 +6,6 @@ export async function getOneDocument(inn: string, doc_id: string) {
   try {
     const configService = new ConfigService();
     const user_key = configService.get(inn);
-    console.log(user_key);
 
     const partnet_token = configService.get('DIDOX_TOKEN');
 

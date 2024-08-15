@@ -85,7 +85,7 @@ export class UsersService {
       data.password = await argon2.hash(data.password);
     }
 
-    if (data.role && isExist.role !== 'superadmin')
+    if (data?.role && isExist.role !== 'superadmin')
       throw new BadRequestException('You are not allowed to update role');
 
     const user = await this.prismaService.users.update({

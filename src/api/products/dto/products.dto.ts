@@ -37,4 +37,8 @@ export class ProductsResDto {
 
   @Expose()
   updatedAt: string;
+
+
+  @Expose()
+  labels: any[];
 }

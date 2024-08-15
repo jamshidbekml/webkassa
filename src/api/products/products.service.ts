@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 // import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { getCategoryName } from '../shared/utils/get-category-name';
 
 @Injectable()
 export class ProductsService {
@@ -41,6 +42,15 @@ export class ProductsService {
       take: limit,
     });
     const products = await this.prismaService.products.findMany({
+      include: {
+        labels: {
+          where: { sold: false },
+          select: {
+            id: true,
+            label: true,
+          },
+        },
+      },
       where: {
         branchId,
         ...(search && {
@@ -65,6 +75,91 @@ export class ProductsService {
       pageSize: limit,
       current: page,
     };
+  }
+
+  async createManual(createProductDto: CreateProductDto, branchId: string) {
+    let category = await this.prismaService.categories.findUnique({
+      where: { code: createProductDto.catalogcode.slice(0, 5) },
+    });
+    if (!category) {
+      const catalogName = await getCategoryName(
+        createProductDto.catalogcode.slice(0, 5),
+      );
+
+      category = await this.prismaService.categories.create({
+        data: {
+          code: createProductDto.catalogcode.slice(0, 5),
+          name: catalogName,
+          branchId: branchId,
+        },
+      });
+    }
+
+    const existProduct = await this.prismaService.products.findFirst({
+      where: { name: createProductDto.name },
+    });
+
+    if (existProduct && existProduct.name == createProductDto.name) {
+      await this.prismaService.products.update({
+        where: { id: existProduct.id },
+        data: { count: existProduct.count + Number(createProductDto.count) },
+      });
+
+      if (createProductDto?.lables) {
+        await this.prismaService.products.update({
+          where: { id: existProduct.id },
+          data: {
+            isMarked: true,
+          },
+        });
+        for await (const mark of createProductDto.lables) {
+          await this.prismaService.productMarks.create({
+            data: {
+              label: mark,
+              productId: existProduct.id,
+            },
+          });
+        }
+      }
+
+      return {
+        data: existProduct,
+        message: 'Mahsulot muvaffaqqiyatli taratildi',
+      };
+    } else {
+      const newProduct = await this.create({
+        name: createProductDto.name,
+        barcode: createProductDto.barcode,
+        packagecode: createProductDto.packagecode,
+        count: +createProductDto.count,
+        vat: createProductDto.vat,
+        categoryId: category.id,
+        branchId: branchId,
+        catalogcode: createProductDto.catalogcode,
+      });
+
+      if (createProductDto?.lables) {
+        await this.prismaService.products.update({
+          where: { id: newProduct.id },
+          data: {
+            isMarked: true,
+          },
+        });
+        for await (const mark of createProductDto.lables) {
+          await this.prismaService.productMarks.create({
+            data: {
+              label: mark,
+              productId: newProduct.id,
+            },
+          });
+        }
+      }
+
+      return {
+        data: newProduct,
+        message: 'Mahsulot muvaffaqqiyatli taratildi',
+      };
+    }
   }
 
   // findOne(id: number) {

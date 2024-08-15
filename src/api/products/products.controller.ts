@@ -1,15 +1,16 @@
 import {
+  Body,
   Controller,
-  Get,
+  Get, Post,
   Query,
-  Req,
+  Req
   // Get,
   // Post,
   // Body,
   // Patch,
   // Param,
   // Delete,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import { ProductsService } from './products.service';
 // import { CreateProductDto } from './dto/create-product.dto';
 // import { UpdateProductDto } from './dto/update-product.dto';
@@ -22,6 +23,7 @@ import {
 import { NestedSerialize } from '../interceptors/nested-serialize.interceptor';
 import { ProductsResDto } from './dto/products.dto';
 import { Request } from 'express';
+import { CreateProductDto } from './dto/create-product.dto';
 
 @ApiBearerAuth()
 @ApiTags('products')
@@ -59,6 +61,13 @@ export class ProductsController {
       categoryId,
       label,
     );
+  }
+
+  @Post('manual')
+  @ApiOperation({ summary: 'Create product manually' })
+  createManual(@Req() req: Request, @Body() body: CreateProductDto) {
+    const { branchId } = req['user'] as { branchId: string };
+    return this.productsService.createManual(body, branchId);
   }
 
   // @Get(':id')
