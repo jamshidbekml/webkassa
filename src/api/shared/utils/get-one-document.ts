@@ -1,6 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { IDocument } from '../interfaces/didox.interface';
+import { BadRequestException } from '@nestjs/common';
 
 export async function getOneDocument(inn: string, doc_id: string) {
   try {
@@ -21,6 +22,8 @@ export async function getOneDocument(inn: string, doc_id: string) {
 
     return data.data;
   } catch (err) {
-    console.log(err.message);
+    throw new BadRequestException(
+      `ERROR ON GET ONE DIDOX DOCUMENT: ${err.message}`,
+    );
   }
 }

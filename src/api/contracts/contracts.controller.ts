@@ -6,6 +6,7 @@ import {
   CreateContract,
   DeleteContract,
   GetContract,
+  GetContractProducts,
   GetContracts,
 } from './docorators/contract.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -36,6 +37,11 @@ export class ContractsController {
   @GetContract(':id')
   findOne(@Param('id') id: string) {
     return this.contractsService.findOne(id);
+  }
+
+  @GetContractProducts('sat/:contractId')
+  getContractProducts(@Param('contractId') contractId: string) {
+    return this.contractsService.getContractProducts(contractId);
   }
 
   @DeleteContract(':id')

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { CreateContractDto } from './dto/create-contract.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { getContractProductsFromSat } from '../shared/utils/get-contract-products-from-sat';
 
 @Injectable()
 export class ContractsService {
@@ -50,7 +51,9 @@ export class ContractsService {
     return 'Shartnoma yaratildi!';
   }
 
-  async getContractProducts(contractId: string) {}
+  async getContractProducts(contractId: string) {
+    return await getContractProductsFromSat(contractId);
+  }
 
   async findAll(branchId: string, page: number, limit: number, search: string) {
     const total = await this.prismaService.contracts.count({

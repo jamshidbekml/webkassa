@@ -30,6 +30,7 @@ model Users {
   username     String  @unique
   password     String
   name         String
+  satId String?
   refreshToken String?
   role         ROLE    @default(cashier)
 

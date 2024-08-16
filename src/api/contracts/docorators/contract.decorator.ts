@@ -57,3 +57,11 @@ export function DeleteContract(routeName?: string) {
     Delete(routeName),
   );
 }
+
+export function GetContractProducts(routeName?: string) {
+  return applyDecorators(
+    ApiOperation({ summary: 'Get Contract Products From Sat' }),
+    ApiParam({ name: 'contractId', type: 'string' }),
+    Get(routeName),
+  );
+}

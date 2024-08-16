@@ -1,6 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { GetAllDocumentsFromDidox } from '../interfaces/didox.interface';
+import { BadRequestException } from '@nestjs/common';
 
 export async function getDidoxDocuments(inn: string, page: number) {
   try {
@@ -22,6 +23,8 @@ export async function getDidoxDocuments(inn: string, page: number) {
 
     return data.data;
   } catch (err) {
-    console.log(err.message);
+    throw new BadRequestException(
+      `ERROR ON GET DIDOX DOCUMENTS: ${err.message}`,
+    );
   }
 }
