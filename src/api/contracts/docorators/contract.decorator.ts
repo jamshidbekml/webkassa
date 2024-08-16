@@ -9,6 +9,7 @@ export function CreateContract(routeName?: string) {
         type: 'object',
         properties: {
           contractId: { type: 'string' },
+          clientFullName: { type: 'string' },
           phone: { type: 'string' },
           pinfl: { type: 'string' },
           passportSeries: { type: 'string' },
