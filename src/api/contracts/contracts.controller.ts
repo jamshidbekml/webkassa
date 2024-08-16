@@ -31,7 +31,7 @@ export class ContractsController {
     @Query('search') search?: string,
   ) {
     const { branchId } = req['user'] as { branchId: string };
-    return this.contractsService.findAll(branchId, page, limit, search);
+    return this.contractsService.findAll(branchId, +page, +limit, search);
   }
 
   @GetContract(':id')
