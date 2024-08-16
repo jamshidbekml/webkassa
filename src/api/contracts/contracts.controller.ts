@@ -1,29 +1,28 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  Req,
-  Query,
-} from '@nestjs/common';
+import { Controller, Body, Param, Req, Query } from '@nestjs/common';
 import { ContractsService } from './contracts.service';
 import { CreateContractDto } from './dto/create-contract.dto';
 import { Request } from 'express';
-import { ApiOperation } from '@nestjs/swagger';
+import {
+  CreateContract,
+  DeleteContract,
+  GetContract,
+  GetContracts,
+} from './docorators/contract.decorator';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('contracts')
+@ApiBearerAuth()
 @Controller('contracts')
 export class ContractsController {
   constructor(private readonly contractsService: ContractsService) {}
 
-  @Post()
+  @CreateContract()
   create(@Req() req: Request, @Body() createContractDto: CreateContractDto) {
     const { branchId } = req['user'] as { branchId: string };
     return this.contractsService.create(createContractDto, branchId);
   }
 
-  @Get()
+  @GetContracts()
   findAll(
     @Req() req: Request,
     @Query('page') page = 1,
@@ -34,12 +33,12 @@ export class ContractsController {
     return this.contractsService.findAll(branchId, +page, +limit, search);
   }
 
-  @Get(':id')
+  @GetContract(':id')
   findOne(@Param('id') id: string) {
     return this.contractsService.findOne(id);
   }
 
-  @Delete(':id')
+  @DeleteContract(':id')
   remove(@Param('id') id: string) {
     return this.contractsService.remove(id);
   }

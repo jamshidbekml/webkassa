@@ -1,5 +1,5 @@
 export class CreateContractDto {
-  contractid: string;
+  contractId: string;
   phone: string;
   clientFullName: string;
   passportSeries: string;

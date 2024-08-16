@@ -106,9 +106,9 @@ model ProductMarks {
 
 model Contracts {
   id String @id @default(uuid()) @db.Uuid
-  saleId String?
   clientFullName String
-  contractId String
+  saleId String? @unique
+  contractId String @unique
   phone String
   passportSeries String
   pinfl String
