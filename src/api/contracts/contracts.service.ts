@@ -13,6 +13,7 @@ export class ContractsService {
         phone: createContractDto.phone,
         pinfl: createContractDto.pinfl,
         passportSeries: createContractDto.passportSeries,
+        clientFullName: createContractDto.clientFullName,
       },
     });
 
@@ -55,6 +56,9 @@ export class ContractsService {
                 {
                   passportSeries: { contains: search, mode: 'insensitive' },
                 },
+                {
+                  clientFullName: { contains: search, mode: 'insensitive' },
+                },
               ],
             }
           : {}),
@@ -74,6 +78,9 @@ export class ContractsService {
                 },
                 {
                   passportSeries: { contains: search, mode: 'insensitive' },
+                },
+                {
+                  clientFullName: { contains: search, mode: 'insensitive' },
                 },
               ],
             }
