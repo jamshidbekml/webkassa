@@ -20,6 +20,8 @@ export async function getOneDocument(inn: string, doc_id: string) {
       },
     );
 
+    console.log(data.data);
+
     return data.data;
   } catch (err) {
     throw new BadRequestException(

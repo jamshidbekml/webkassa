@@ -9,8 +9,15 @@ export async function getContractProductsFromSat(contractId: string) {
       `${config.get('SAT_USERNAME')}:${config.get('SAT_PASSWORD')}`,
     ).toString('base64');
     const data = await axios.get<{
-      products: { name: string; price: number; count: number }[];
-      bonus: { name: string; price: number; count: number }[];
+      client: {
+        tell1: string;
+        fio: string;
+        pnfl: string;
+        passport: string;
+        shraqam: string;
+      };
+      products: { name: string; summa: number; count: number }[];
+      bonus: { name: string; summa: number; count: number }[];
     }>(
       `${config.get('SAT_URL')}/api/v1/clients/products?branch=${contractId.split('_')[0].toLowerCase()}&contractid=${contractId}`,
       {

@@ -40,13 +40,15 @@ export class DidoxService {
       throw new BadRequestException('Maxsulotlar allaqachon qo`shilgan!');
 
     const {
-      document: { status, doc_id },
+      document: { status, doc_id, doctype },
       json: {
         productlist: { products },
       },
     } = await this.findOneDocument(inn, docId);
 
     if (status !== 3) throw new BadRequestException('Faktura tasdiqlanmagan!');
+    if (doctype !== '002')
+      throw new BadRequestException('Bu fakturdan kirim qila olmaysiz!');
 
     for await (const product of products) {
       const branch = await this.prismaService.branches.findUnique({

@@ -22,6 +22,7 @@ export interface IDocument {
     document: {
       status: number;
       doc_id: string;
+      doctype: string;
     };
   };
 }

@@ -53,7 +53,77 @@ export class ContractsService {
   }
 
   async getContractProducts(contractId: string) {
-    return await getContractProductsFromSat(contractId);
+    const satProducts = await getContractProductsFromSat(contractId);
+    const products = [];
+    for await (const product of satProducts.products) {
+      const foundProduct = await this.prismaService.products.findFirst({
+        where: {
+          name: product.name,
+        },
+        include: {
+          labels: {
+            where: { sold: false },
+          },
+        },
+      });
+
+      if (!foundProduct || foundProduct.name !== product.name)
+        throw new BadRequestException(
+          `Satdan kelgan mahsulot kassa mahsuloti bilan mos kelmayabdi! Mahsulot: ${product.name}`,
+        );
+
+      products.push({
+        id: foundProduct.id,
+        name: foundProduct.name,
+        isMarked: foundProduct.isMarked,
+        labels: foundProduct.labels.length
+          ? foundProduct.labels.map((e) => e.label)
+          : [],
+        amount: product.summa,
+        discountAmount: 0,
+        count: 1,
+      });
+    }
+
+    for await (const product of satProducts.bonus) {
+      const foundProduct = await this.prismaService.products.findFirst({
+        where: {
+          name: product.name,
+        },
+        include: {
+          labels: {
+            where: { sold: false },
+          },
+        },
+      });
+
+      if (!foundProduct || foundProduct.name !== product.name)
+        throw new BadRequestException(
+          `Satdan kelgan mahsulot kassa mahsuloti bilan mos kelmayabdi! Mahsulot: ${product.name}`,
+        );
+
+      products.push({
+        id: foundProduct.id,
+        name: foundProduct.name,
+        isMarked: foundProduct.isMarked,
+        labels: foundProduct.labels.length
+          ? foundProduct.labels.map((e) => e.label)
+          : [],
+        amount: product.summa,
+        discountAmount: 0,
+        count: 1,
+      });
+    }
+
+    return {
+      data: {
+        contractId,
+        clientFullName: satProducts.client.fio,
+        passportSeries: satProducts.client.passport,
+        pinfl: satProducts.client.pnfl,
+        products,
+      },
+    };
   }
 
   async findAll(branchId: string, page: number, limit: number, search: string) {
