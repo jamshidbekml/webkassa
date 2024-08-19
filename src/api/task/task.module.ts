@@ -3,5 +3,6 @@ import { TaskService } from './task.service';
 
 @Module({
   providers: [TaskService],
+  exports: [TaskService],
 })
 export class TaskModule {}

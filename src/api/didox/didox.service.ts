@@ -5,31 +5,43 @@ import { DOCUMENT_STATUS } from '../shared/constants/document-status';
 import { ProductsService } from '../products/products.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { getCategoryName } from '../shared/utils/get-category-name';
+import { TaskService } from '../task/task.service';
 
 @Injectable()
 export class DidoxService {
   constructor(
     private readonly productService: ProductsService,
     private readonly prismaService: PrismaService,
+    private readonly taskService: TaskService,
   ) {}
   async findAllDocuments(page: number, inn: string) {
-    const data = await getDidoxDocuments(inn, page);
+    try {
+      const data = await getDidoxDocuments(inn, page);
 
-    return {
-      data: data.data,
-      pageSize: 20,
-      current: page,
-      total: data?.total,
-    };
+      return {
+        data: data.data,
+        pageSize: 20,
+        current: page,
+        total: data?.total,
+      };
+    } catch (err) {
+      await this.taskService.tokenUpdater();
+      throw new BadRequestException(err.message);
+    }
   }
 
   async findOneDocument(inn: string, doc_id: string) {
-    const data = await getOneDocument(inn, doc_id);
+    try {
+      const data = await getOneDocument(inn, doc_id);
 
-    return {
-      ...data.data,
-      status: DOCUMENT_STATUS[data.data.document.status],
-    };
+      return {
+        ...data.data,
+        status: DOCUMENT_STATUS[data.data.document.status],
+      };
+    } catch (err) {
+      await this.taskService.tokenUpdater();
+      throw new BadRequestException(err.message);
+    }
   }
 
   async createProducts(inn: string, docId: string) {
