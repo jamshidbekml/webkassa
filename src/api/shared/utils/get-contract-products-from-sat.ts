@@ -10,7 +10,7 @@ export async function getContractProductsFromSat(contractId: string) {
     ).toString('base64');
     const data = await axios.get<{
       client: {
-        tell1: string;
+        tel1: string;
         fio: string;
         pnfl: string;
         passport: string;
