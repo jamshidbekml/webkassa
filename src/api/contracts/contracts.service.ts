@@ -121,6 +121,7 @@ export class ContractsService {
         clientFullName: satProducts.client.fio,
         passportSeries: satProducts.client.passport,
         pinfl: satProducts.client.pnfl,
+        phone: satProducts.client.tell1,
         products,
       },
     };
