@@ -137,7 +137,8 @@ export class ContractsService {
         date: e.sana,
         amount: e.summa,
         debt: e.qoldiq,
-        peyed: e.tulov,
+        payed: e.tulov,
+        closed: e.yopildi,
       })),
     };
   }
