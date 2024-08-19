@@ -131,13 +131,15 @@ export class ContractsService {
   async getContractGraph(contractId: string) {
     const { grafik } = await getContractGraphFromSat(contractId);
 
-    return grafik.map((e) => ({
-      id: e.nomer,
-      date: e.sana,
-      amount: e.summa,
-      debt: e.qoldiq,
-      peyed: e.tulov,
-    }));
+    return {
+      data: grafik.map((e) => ({
+        id: e.nomer,
+        date: e.sana,
+        amount: e.summa,
+        debt: e.qoldiq,
+        peyed: e.tulov,
+      })),
+    };
   }
 
   async findAll(branchId: string, page: number, limit: number, search: string) {
