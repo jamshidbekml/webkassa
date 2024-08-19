@@ -6,6 +6,7 @@ import {
 import { CreateContractDto } from './dto/create-contract.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { getContractProductsFromSat } from '../shared/utils/get-contract-products-from-sat';
+import { getContractGraphFromSat } from '../shared/utils/get-contract-graph';
 
 @Injectable()
 export class ContractsService {
@@ -125,6 +126,18 @@ export class ContractsService {
         products,
       },
     };
+  }
+
+  async getContractGraph(contractId: string) {
+    const { grafik } = await getContractGraphFromSat(contractId);
+
+    return grafik.map((e) => ({
+      id: e.nomer,
+      date: e.sana,
+      amount: e.summa,
+      debt: e.qoldiq,
+      peyed: e.tulov,
+    }));
   }
 
   async findAll(branchId: string, page: number, limit: number, search: string) {

@@ -66,3 +66,11 @@ export function GetContractProducts(routeName?: string) {
     Get(routeName),
   );
 }
+
+export function GetContractGraph(routeName?: string) {
+  return applyDecorators(
+    ApiOperation({ summary: 'Get Contract Graph From Sat' }),
+    ApiParam({ name: 'contractId', type: 'string' }),
+    Get(routeName),
+  );
+}

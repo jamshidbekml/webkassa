@@ -6,6 +6,7 @@ import {
   CreateContract,
   DeleteContract,
   GetContract,
+  GetContractGraph,
   GetContractProducts,
   GetContracts,
 } from './docorators/contract.decorator';
@@ -39,9 +40,14 @@ export class ContractsController {
     return this.contractsService.findOne(id);
   }
 
-  @GetContractProducts('sat/:contractId')
+  @GetContractProducts('products/:contractId')
   getContractProducts(@Param('contractId') contractId: string) {
     return this.contractsService.getContractProducts(contractId);
+  }
+
+  @GetContractGraph('graph/:contractId')
+  getContractGraph(@Param('contractId') contractId: string) {
+    return this.contractsService.getContractGraph(contractId);
   }
 
   @DeleteContract(':id')
