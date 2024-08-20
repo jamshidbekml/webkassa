@@ -59,11 +59,21 @@ model Branches {
   products Products[]
   contracts Contracts[]
   receipts Receipts[]
+  terminals Terminals[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("branches")
+}
+
+model Terminals {
+  id String @id @default(uuid()) @db.Uuid
+  address String?
+  password String
+  login String
+  branchId String @db.Uuid
+  branch Branches @relation(fields: [branchId], references: [id])
 }
 
 model Categories {
