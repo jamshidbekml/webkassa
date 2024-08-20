@@ -1,34 +1,49 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Req, Body, Query, Param } from '@nestjs/common';
 import { ReceiptsService } from './receipts.service';
 import { CreateReceiptDto } from './dto/create-receipt.dto';
-import { UpdateReceiptDto } from './dto/update-receipt.dto';
+import { Request } from 'express';
+import {
+  CreateReceipt,
+  GetAllReceipts,
+  GetReceipt,
+} from './decorators/receipts.decorator';
+import { RECEIPT_TYPE } from '@prisma/client';
 
 @Controller('receipts')
 export class ReceiptsController {
   constructor(private readonly receiptsService: ReceiptsService) {}
 
-  @Post()
-  create(@Body() createReceiptDto: CreateReceiptDto) {
-    return this.receiptsService.create(createReceiptDto);
+  @CreateReceipt()
+  create(@Req() req: Request, @Body() createReceiptDto: CreateReceiptDto) {
+    const { branchId, sub } = req['user'] as { branchId: string; sub: string };
+    return this.receiptsService.create(createReceiptDto, sub, branchId);
   }
 
-  @Get()
-  findAll() {
-    return this.receiptsService.findAll();
+  @GetAllReceipts()
+  findAll(
+    @Req() req: Request,
+    @Query('type') type: RECEIPT_TYPE,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('search') search?: string,
+    @Query('from')
+    from?: Date,
+    @Query('to') to?: Date,
+  ) {
+    const { branchId } = req['user'] as { branchId: string };
+    return this.receiptsService.findAll(
+      branchId,
+      type,
+      page,
+      limit,
+      search,
+      from,
+      to,
+    );
   }
 
-  @Get(':id')
+  @GetReceipt()
   findOne(@Param('id') id: string) {
-    return this.receiptsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReceiptDto: UpdateReceiptDto) {
-    return this.receiptsService.update(+id, updateReceiptDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.receiptsService.remove(+id);
+    return this.receiptsService.findOneReceipt(id);
   }
 }

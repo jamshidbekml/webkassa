@@ -2,7 +2,7 @@ import { Controller, Body, Req, Get, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
 import { GetMe, SignIn } from './decorators/auth.decorator';
-import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { Public } from './decorators/public.decorator';
 import { RefreshTokenGuard } from './guards/refreshToken.guard';

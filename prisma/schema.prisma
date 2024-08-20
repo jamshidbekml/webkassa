@@ -21,8 +21,13 @@ enum ROLE {
 
 enum PAYMENT_TYPE {
   cash
-  card
   cashless
+}
+
+enum RECEIPT_TYPE {
+  sale
+  credit
+  canceled
 }
 
 model Users {
@@ -30,7 +35,7 @@ model Users {
   username     String  @unique
   password     String
   name         String
-  satId String?
+  satId Int?
   refreshToken String?
   role         ROLE    @default(cashier)
 
@@ -38,6 +43,8 @@ model Users {
   branch Branches? @relation(fields: [branchId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  receipts Receipts[]
+  payments Payments[]
 
   @@map("users")
 }
@@ -51,6 +58,7 @@ model Branches {
   catogries Categories[]
   products Products[]
   contracts Contracts[]
+  receipts Receipts[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -88,7 +96,6 @@ model Products {
   categoryId String @db.Uuid
   category Categories @relation(fields: [categoryId], references: [id])
   labels ProductMarks[]
-  receipts Receipts[]
   contractProducts ContractProducts[]
 
   @@map("products")
@@ -108,7 +115,6 @@ model ProductMarks {
 model Contracts {
   id String @id @default(uuid()) @db.Uuid
   clientFullName String
-  saleId String? @unique
   contractId String @unique
   phone String
   passportSeries String
@@ -144,17 +150,34 @@ model ContractProductLabels {
 
 model Receipts {
   id String @id @default(uuid()) @db.Uuid
-  paymentType PAYMENT_TYPE
-  saleId String
-  amount Int
-  productId String @db.Uuid
-  product Products @relation(fields: [productId], references: [id])
-  label String?
+  cTin String
+  cName String
+  tAmount Int
+  tVat Int
+  saleId String @unique
+  type RECEIPT_TYPE
+  cashierId String @db.Uuid
+  cashier Users @relation(fields: [cashierId], references: [id])
   contractId String @db.Uuid
   contract Contracts @relation(fields: [contractId], references: [id])
+  branchId String @db.Uuid
+  branch Branches @relation(fields: [branchId], references: [id])
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  payments Payments[]
   @@map("receipts")
+}
+
+model Payments {
+  id String @id @default(uuid()) @db.Uuid
+  amount Int
+  type PAYMENT_TYPE
+  receiptId String @db.Uuid
+  receipt Receipts @relation(fields: [receiptId], references: [id])
+  cashierId String @db.Uuid
+  cashier Users @relation(fields: [cashierId], references: [id])
+
+  @@map("payments")
 }
 
 model FetchedDocuments {

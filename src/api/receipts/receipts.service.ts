@@ -1,26 +1,165 @@
-import { Injectable } from '@nestjs/common';
-import { CreateReceiptDto } from './dto/create-receipt.dto';
-import { UpdateReceiptDto } from './dto/update-receipt.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { CreatePaymentDto, CreateReceiptDto } from './dto/create-receipt.dto';
+import { PrismaService } from '../prisma/prisma.service';
+import { RECEIPT_TYPE } from '@prisma/client';
 
 @Injectable()
 export class ReceiptsService {
-  create(createReceiptDto: CreateReceiptDto) {
-    return 'This action adds a new receipt';
+  constructor(private readonly prismaService: PrismaService) {}
+
+  async create(
+    createReceiptDto: CreateReceiptDto,
+    userId: string,
+    branchId: string,
+  ) {
+    const receipt = await this.prismaService.receipts.create({
+      data: {
+        cashierId: userId,
+        branchId,
+        contractId: createReceiptDto.contractId,
+        cTin: createReceiptDto.cTin,
+        cName: createReceiptDto.cName,
+        tAmount: createReceiptDto.tAmount,
+        tVat: createReceiptDto.tVat,
+        saleId: createReceiptDto.saleId,
+        type: createReceiptDto.type,
+      },
+    });
+
+    for await (const payment of createReceiptDto.payments) {
+      await this.prismaService.payments.create({
+        data: {
+          receiptId: receipt.id,
+          amount: payment.amount,
+          type: payment.type,
+          cashierId: userId,
+        },
+      });
+    }
+
+    return { data: receipt };
   }
 
-  findAll() {
-    return `This action returns all receipts`;
+  async findAll(
+    branchId: string,
+    type: RECEIPT_TYPE,
+    page: number,
+    limit: number,
+    search?: string,
+    startDate?: Date,
+    endDate?: Date,
+  ) {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const effectiveStartDate = startDate ?? todayStart;
+    const effectiveEndDate = endDate ?? todayEnd;
+    const receipts = await this.prismaService.receipts.findMany({
+      where: {
+        branchId,
+        type,
+        ...(search
+          ? {
+              contract: {
+                OR: [
+                  { phone: { contains: search, mode: 'insensitive' } },
+                  { contractId: { contains: search, mode: 'insensitive' } },
+                  {
+                    pinfl: { contains: search, mode: 'insensitive' },
+                  },
+                  {
+                    passportSeries: { contains: search, mode: 'insensitive' },
+                  },
+                  {
+                    clientFullName: { contains: search, mode: 'insensitive' },
+                  },
+                ],
+              },
+            }
+          : {
+              createdAt: {
+                gte: new Date(effectiveStartDate),
+                lte: new Date(effectiveEndDate),
+              },
+            }),
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    const total = await this.prismaService.receipts.count({
+      where: {
+        branchId,
+        type,
+        ...(search
+          ? {
+              contract: {
+                OR: [
+                  { phone: { contains: search, mode: 'insensitive' } },
+                  { contractId: { contains: search, mode: 'insensitive' } },
+                  {
+                    pinfl: { contains: search, mode: 'insensitive' },
+                  },
+                  {
+                    passportSeries: { contains: search, mode: 'insensitive' },
+                  },
+                  {
+                    clientFullName: { contains: search, mode: 'insensitive' },
+                  },
+                ],
+              },
+            }
+          : {
+              createdAt: {
+                gte: new Date(effectiveStartDate),
+                lte: new Date(effectiveEndDate),
+              },
+            }),
+      },
+    });
+
+    return {
+      data: receipts,
+      pageSize: limit,
+      total,
+      current: page,
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} receipt`;
+  async findOneReceipt(id: string) {
+    const receipt = await this.prismaService.receipts.findUnique({
+      where: { id },
+      include: {
+        cashier: { select: { name: true } },
+        payments: {
+          include: { cashier: { select: { name: true } } },
+        },
+      },
+    });
+
+    if (!receipt) throw new BadRequestException('Bunday chek topilmadi');
+    return { data: receipt };
   }
 
-  update(id: number, updateReceiptDto: UpdateReceiptDto) {
-    return `This action updates a #${id} receipt`;
-  }
+  async createPayment(userId: string, saleId: string, body: CreatePaymentDto) {
+    const receipt = await this.prismaService.receipts.findUnique({
+      where: { saleId },
+    });
 
-  remove(id: number) {
-    return `This action removes a #${id} receipt`;
+    if (!receipt) throw new BadRequestException('Bunday savdo cheki topilmadi');
+
+    await this.prismaService.payments.create({
+      data: {
+        amount: body.amount,
+        type: body.type,
+        cashierId: userId,
+        receiptId: receipt.id,
+      },
+    });
+
+    return `To'lov muvaffaqqiyatli qabul qilindi!`;
   }
 }

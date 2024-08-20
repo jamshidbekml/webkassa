@@ -224,27 +224,13 @@ export class ContractsService {
     return { data: contract };
   }
 
-  async update(id: string, saleId: string) {
-    const contract = await this.prismaService.contracts.findUnique({
-      where: { id },
-    });
-
-    if (!contract) throw new NotFoundException('Shartnoma topilmadi');
-
-    return await this.prismaService.contracts.update({
-      where: { id: contract.id },
-      data: {
-        saleId,
-      },
-    });
-  }
-
   async remove(id: string) {
     const contract = await this.prismaService.contracts.findUnique({
       where: { id },
+      include: { receipts: true },
     });
 
-    if (contract.saleId)
+    if (contract.receipts.length)
       throw new NotFoundException(
         "Shartnomaga to'lov qilingan, o'chirish mumkin emas",
       );
