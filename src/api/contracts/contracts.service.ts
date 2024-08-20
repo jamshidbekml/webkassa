@@ -203,6 +203,7 @@ export class ContractsService {
           select: {
             product: {
               select: {
+                id: true,
                 barcode: true,
                 catalogcode: true,
                 name: true,
