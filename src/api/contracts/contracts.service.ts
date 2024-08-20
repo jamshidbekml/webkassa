@@ -234,7 +234,7 @@ export class ContractsService {
         updatedAt: contract.updatedAt,
         products: contract.products.map((product) => ({
           id: product.product.id,
-          barCode: product.product.barcode,
+          barcode: product.product.barcode,
           psid: product.product.catalogcode,
           name: product.product.name,
           packageCode: product.product.packagecode,
