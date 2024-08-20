@@ -45,7 +45,7 @@ export class ReceiptsController {
     );
   }
 
-  @GetReceipt()
+  @GetReceipt(':id')
   findOne(@Param('id') id: string) {
     return this.receiptsService.findOneReceipt(id);
   }
