@@ -222,9 +222,35 @@ export class ContractsService {
 
     if (!contract) throw new NotFoundException('Shartnoma topilmadi');
 
-    console.log(contract);
-
-    return contract;
+    return {
+      data: {
+        id: contract.id,
+        clientFullName: contract.clientFullName,
+        contractId: contract.contractId,
+        phone: contract.phone,
+        passportSeries: contract.passportSeries,
+        pinfl: contract.pinfl,
+        createdAt: contract.createdAt,
+        updatedAt: contract.updatedAt,
+        products: contract.products.map((product) => ({
+          id: product.product.id,
+          barCode: product.product.barcode,
+          psid: product.product.catalogcode,
+          name: product.product.name,
+          packageCode: product.product.packagecode,
+          vat: Number(product.product.vat) / 100,
+          price: product.amount,
+          amount: product.count,
+          discountAmount: 0,
+          labels: product.labels.map((e) => e.label),
+          units: 'шт',
+          isDecimalUnits: false,
+          unitCode: null,
+          commissionPINFL: null,
+          commissionTIN: null,
+        })),
+      },
+    };
   }
 
   async remove(id: string) {

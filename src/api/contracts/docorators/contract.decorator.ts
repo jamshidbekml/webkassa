@@ -1,7 +1,5 @@
 import { applyDecorators, Delete, Get, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
-import { Serialize } from 'src/api/interceptors/serialize.interceptor';
-import { ContractResponse } from '../dto/contract.dto';
 
 export function CreateContract(routeName?: string) {
   return applyDecorators(
@@ -47,7 +45,6 @@ export function GetContracts(routeName?: string) {
 
 export function GetContract(routeName?: string) {
   return applyDecorators(
-    Serialize(ContractResponse),
     ApiOperation({ summary: 'Find Contract' }),
     ApiParam({ name: 'id', type: 'string' }),
     Get(routeName),
