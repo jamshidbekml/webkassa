@@ -25,7 +25,6 @@ export class ContractResponse {
   @Expose()
   updatedAt: Date;
 
-  @Expose()
   //   @Transform(
   //     ({ value }) => {
   //       return value
@@ -55,5 +54,6 @@ export class ContractResponse {
   //       toClassOnly: true,
   //     },
   //   )
-  products;
+  @Expose()
+  products: any[];
 }
