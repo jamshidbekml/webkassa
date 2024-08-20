@@ -55,5 +55,5 @@ export class ContractResponse {
   //     },
   //   )
   @Expose()
-  products: any[];
+  products: object[];
 }
