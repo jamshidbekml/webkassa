@@ -47,7 +47,7 @@ export function GetContracts(routeName?: string) {
 
 export function GetContract(routeName?: string) {
   return applyDecorators(
-    Serialize(ContractResponse),
+    // Serialize(ContractResponse),
     ApiOperation({ summary: 'Find Contract' }),
     ApiParam({ name: 'id', type: 'string' }),
     Get(routeName),
