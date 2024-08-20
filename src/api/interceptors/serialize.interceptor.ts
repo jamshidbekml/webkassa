@@ -21,9 +21,11 @@ export class SerializeInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, handler: CallHandler): Observable<any> {
     return handler.handle().pipe(
       map((data: any) => {
-        return plainToClass(this.dto, data, {
+        const serialized = plainToClass(this.dto, data, {
           excludeExtraneousValues: true,
         });
+
+        return { ...data, data: serialized };
       }),
     );
   }
