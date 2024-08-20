@@ -55,5 +55,5 @@ export class ContractResponse {
   //       toClassOnly: true,
   //     },
   //   )
-  products: any[];
+  products;
 }
