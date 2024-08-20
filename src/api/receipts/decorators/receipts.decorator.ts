@@ -40,6 +40,7 @@ export function GetAllReceipts(routeName?: string) {
     ApiQuery({ name: 'type', required: true, enum: RECEIPT_TYPE }),
     ApiQuery({ name: 'page', required: false, example: 1 }),
     ApiQuery({ name: 'limit', required: false, example: 10 }),
+    ApiQuery({ name: 'search', required: false, type: 'string' }),
     ApiQuery({
       name: 'from',
       required: false,
