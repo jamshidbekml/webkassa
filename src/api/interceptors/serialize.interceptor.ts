@@ -25,7 +25,7 @@ export class SerializeInterceptor implements NestInterceptor {
           excludeExtraneousValues: true,
         });
 
-        return { ...data, data: serialized };
+        return { data: serialized };
       }),
     );
   }
