@@ -8,7 +8,10 @@ import {
   GetReceipt,
 } from './decorators/receipts.decorator';
 import { RECEIPT_TYPE } from '@prisma/client';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
+@ApiTags('receipts')
 @Controller('receipts')
 export class ReceiptsController {
   constructor(private readonly receiptsService: ReceiptsService) {}
