@@ -222,7 +222,7 @@ export class ContractsService {
 
     if (!contract) throw new NotFoundException('Shartnoma topilmadi');
 
-    return { data: contract };
+    return contract;
   }
 
   async remove(id: string) {
