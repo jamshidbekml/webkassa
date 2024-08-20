@@ -37,8 +37,8 @@ export class ReceiptsController {
     return this.receiptsService.findAll(
       branchId,
       type,
-      page,
-      limit,
+      +page,
+      +limit,
       search,
       from,
       to,
