@@ -222,6 +222,8 @@ export class ContractsService {
 
     if (!contract) throw new NotFoundException('Shartnoma topilmadi');
 
+    console.log(contract);
+
     return contract;
   }
 
