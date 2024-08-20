@@ -41,7 +41,7 @@ export class GetMeDto {
   @Expose()
   @Transform(
     ({ value }) => {
-      return { id: value.id, name: value.name };
+      return value ? { id: value.id, name: value.name } : null;
     },
     {
       toClassOnly: true,
