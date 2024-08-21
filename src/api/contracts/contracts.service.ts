@@ -57,6 +57,7 @@ export class ContractsService {
   async getContractProducts(contractId: string) {
     const satProducts = await getContractProductsFromSat(contractId);
     const products = [];
+    const labels = {};
     for await (const product of satProducts.products) {
       const foundProduct = await this.prismaService.products.findFirst({
         where: {
@@ -74,13 +75,11 @@ export class ContractsService {
           `Satdan kelgan mahsulot kassa mahsuloti bilan mos kelmayabdi! Mahsulot: ${product.name}`,
         );
 
+      labels[foundProduct.id] = foundProduct.labels.map((e) => e.label);
       products.push({
         id: foundProduct.id,
         name: foundProduct.name,
         isMarked: foundProduct.isMarked,
-        labels: foundProduct.labels.length
-          ? foundProduct.labels.map((e) => e.label)
-          : [],
         amount: product.summa,
         discountAmount: 0,
         count: 1,
@@ -104,13 +103,11 @@ export class ContractsService {
           `Satdan kelgan mahsulot kassa mahsuloti bilan mos kelmayabdi! Mahsulot: ${product.name}`,
         );
 
+      labels[foundProduct.id] = foundProduct.labels.map((e) => e.label);
       products.push({
         id: foundProduct.id,
         name: foundProduct.name,
         isMarked: foundProduct.isMarked,
-        labels: foundProduct.labels.length
-          ? foundProduct.labels.map((e) => e.label)
-          : [],
         amount: product.summa,
         discountAmount: 0,
         count: 1,
@@ -125,6 +122,7 @@ export class ContractsService {
         pinfl: satProducts.client.pnfl,
         phone: satProducts.client.tel1,
         products,
+        labels,
       },
     };
   }
