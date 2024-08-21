@@ -10,7 +10,6 @@ export class TaskService implements OnModuleInit {
   constructor(private readonly prismaService: PrismaService) {}
   onModuleInit() {
     this.tokenUpdater();
-    this.ikpuAdder();
   }
 
   @Cron(CronExpression.EVERY_3_HOURS)
@@ -55,35 +54,5 @@ export class TaskService implements OnModuleInit {
     } catch (err) {
       console.log(err.message);
     }
-  }
-
-  async ikpuAdder() {
-    await this.prismaService.productMarks.create({
-      data: {
-        productId: '4aa41354-25ff-4cf7-8d27-8461bf0fa390',
-        label: '9789943731936',
-      },
-    });
-
-    await this.prismaService.productMarks.create({
-      data: {
-        productId: '4aa41354-25ff-4cf7-8d27-8461bf0fa390',
-        label: '40099064',
-      },
-    });
-
-    await this.prismaService.productMarks.create({
-      data: {
-        productId: 'dc755510-127a-4086-b972-62a5b3d90e3f',
-        label: '9789943731936',
-      },
-    });
-
-    await this.prismaService.productMarks.create({
-      data: {
-        productId: 'dc755510-127a-4086-b972-62a5b3d90e3f',
-        label: '40099064',
-      },
-    });
   }
 }
