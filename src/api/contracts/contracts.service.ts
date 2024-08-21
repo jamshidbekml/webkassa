@@ -85,18 +85,6 @@ export class ContractsService {
         discountAmount: 0,
         count: 1,
       });
-
-      products.push({
-        id: foundProduct.id,
-        name: foundProduct.name,
-        isMarked: foundProduct.isMarked,
-        labels: foundProduct.labels.length
-          ? foundProduct.labels.map((e) => e.label)
-          : [],
-        amount: product.summa,
-        discountAmount: 0,
-        count: 1,
-      });
     }
 
     for await (const product of satProducts.bonus) {
