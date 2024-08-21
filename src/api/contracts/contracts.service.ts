@@ -242,7 +242,7 @@ export class ContractsService {
           name: product.product.name,
           packageCode: product.product.packagecode,
           vat: Number(product.product.vat) / 100,
-          price: product.amount,
+          price: product.amount * 100,
           amount: product.count,
           discountAmount: 0,
           labels: product.labels.map((e) => e.label),
