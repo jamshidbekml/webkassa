@@ -21,6 +21,7 @@ export class ContractsService {
         branchId,
         contractId: createContractDto.contractId,
         phone: createContractDto.phone,
+        secondPhone: createContractDto.secondPhone,
         pinfl: createContractDto.pinfl,
         passportSeries: createContractDto.passportSeries,
         clientFullName: createContractDto.clientFullName,
@@ -151,6 +152,7 @@ export class ContractsService {
           ? {
               OR: [
                 { phone: { contains: search, mode: 'insensitive' } },
+                { secondPhone: { contains: search, mode: 'insensitive' } },
                 { contractId: { contains: search, mode: 'insensitive' } },
                 {
                   pinfl: { contains: search, mode: 'insensitive' },
@@ -228,6 +230,7 @@ export class ContractsService {
         clientFullName: contract.clientFullName,
         contractId: contract.contractId,
         phone: contract.phone,
+        secondPhone: contract.secondPhone,
         passportSeries: contract.passportSeries,
         pinfl: contract.pinfl,
         createdAt: contract.createdAt,

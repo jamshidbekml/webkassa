@@ -14,6 +14,11 @@ export class CreateContractDto {
   @IsDefined()
   @IsNotEmpty()
   @IsString()
+  secondPhone: string;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @IsString()
   clientFullName: string;
 
   @IsDefined()

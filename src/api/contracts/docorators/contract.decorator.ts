@@ -11,6 +11,7 @@ export function CreateContract(routeName?: string) {
           contractId: { type: 'string' },
           clientFullName: { type: 'string' },
           phone: { type: 'string' },
+          secondPhone: { type: 'string' },
           pinfl: { type: 'string' },
           passportSeries: { type: 'string' },
           products: {

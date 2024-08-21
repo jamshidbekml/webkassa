@@ -1,16 +1,17 @@
 import {
   Body,
   Controller,
-  Get, Post,
+  Get,
+  Post,
   Query,
-  Req
+  Req,
   // Get,
   // Post,
   // Body,
   // Patch,
   // Param,
   // Delete,
-} from "@nestjs/common";
+} from '@nestjs/common';
 import { ProductsService } from './products.service';
 // import { CreateProductDto } from './dto/create-product.dto';
 // import { UpdateProductDto } from './dto/update-product.dto';
