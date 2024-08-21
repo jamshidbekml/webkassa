@@ -127,7 +127,7 @@ model Contracts {
   clientFullName String
   contractId String @unique
   phone String
-  secondPhone String
+  secondPhone String?
   passportSeries String
   pinfl String
   branchId String @db.Uuid
