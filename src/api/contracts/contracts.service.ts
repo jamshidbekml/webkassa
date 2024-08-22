@@ -218,6 +218,7 @@ export class ContractsService {
             labels: { select: { label: true } },
           },
         },
+        receipts: true,
       },
     });
 
