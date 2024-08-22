@@ -31,7 +31,7 @@ export class ReceiptsService {
         data: {
           receiptId: receipt.id,
           amount: payment.amount,
-          type: payment.type,
+          paymentType: payment.paymentType,
           cashierId: userId,
         },
       });

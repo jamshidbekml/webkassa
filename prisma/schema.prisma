@@ -182,7 +182,7 @@ model Receipts {
 model Payments {
   id String @id @default(uuid()) @db.Uuid
   amount Int
-  type PAYMENT_TYPE
+  paymentType PAYMENT_TYPE
   receiptId String @db.Uuid
   receipt Receipts @relation(fields: [receiptId], references: [id])
   cashierId String @db.Uuid

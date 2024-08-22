@@ -51,7 +51,7 @@ export class CreateReceiptDto {
   @IsDefined()
   @IsNotEmpty()
   @IsArray()
-  payments: { amount: number; type: PAYMENT_TYPE }[];
+  payments: { amount: number; paymentType: PAYMENT_TYPE }[];
 }
 
 export class CreatePaymentDto {
