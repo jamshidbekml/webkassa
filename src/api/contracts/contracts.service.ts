@@ -128,7 +128,7 @@ export class ContractsService {
   }
 
   async getContractGraph(contractId: string) {
-    const { grafik } = await getContractGraphFromSat(contractId);
+    const { grafik, tulov } = await getContractGraphFromSat(contractId);
 
     return {
       data: grafik.map((e) => ({
@@ -139,6 +139,7 @@ export class ContractsService {
         payed: e.tulov,
         closed: e.yopildi,
       })),
+      payments: tulov,
     };
   }
 

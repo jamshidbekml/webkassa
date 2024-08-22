@@ -17,6 +17,20 @@ export async function getContractGraphFromSat(contractId: string) {
         qoldiq: number;
         yopildi: boolean;
       }[];
+      tulov: {
+        id: number;
+        sana: string;
+        naqd: number;
+        plastik: number;
+        boshqa_nomi: string;
+        boshqa: number;
+        chegirma: number;
+        bonus_naqd: number;
+        bonus_plastik: number;
+        bonus_jami: number;
+        tasdiqlandi: number;
+        tasdiqladi: string;
+      }[];
     }>(
       `${config.get('SAT_URL')}/api/v1/clients/contracts?branch=${contractId.split('_')[0].toLowerCase()}&shraqam=${contractId}`,
       {
