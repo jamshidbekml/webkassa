@@ -20,8 +20,8 @@ enum ROLE {
 } 
 
 enum PAYMENT_TYPE {
-  cash
-  cashless
+  Cash
+  Cashless
 }
 
 enum RECEIPT_TYPE {
