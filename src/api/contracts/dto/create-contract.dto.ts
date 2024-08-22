@@ -1,4 +1,10 @@
-import { IsArray, IsDefined, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsDefined,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateContractDto {
   @IsDefined()
@@ -11,7 +17,7 @@ export class CreateContractDto {
   @IsString()
   phone: string;
 
-  @IsDefined()
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
   secondPhone: string;
