@@ -218,7 +218,9 @@ export class ContractsService {
             labels: { select: { label: true } },
           },
         },
-        receipts: true,
+        receipts: {
+          include: { payments: true },
+        },
       },
     });
 
@@ -252,6 +254,7 @@ export class ContractsService {
           commissionPINFL: null,
           commissionTIN: null,
         })),
+        receipts: contract.receipts,
       },
     };
   }
