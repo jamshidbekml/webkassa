@@ -62,3 +62,20 @@ export function GetReceipt(routeName?: string) {
     Get(routeName),
   );
 }
+
+export function AddPayment(routeName?: string) {
+  return applyDecorators(
+    ApiOperation({ summary: 'Add payment' }),
+    ApiParam({ name: 'saleId', type: 'string' }),
+    ApiBody({
+      schema: {
+        type: 'object',
+        properties: {
+          amount: { type: 'number' },
+          type: { type: 'enum', example: PAYMENT_TYPE },
+        },
+      },
+    }),
+    Post(routeName),
+  );
+}

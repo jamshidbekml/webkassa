@@ -2,6 +2,7 @@ import { PAYMENT_TYPE, RECEIPT_TYPE } from '@prisma/client';
 import {
   IsArray,
   IsDefined,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsString,
@@ -35,7 +36,7 @@ export class CreateReceiptDto {
 
   @IsDefined()
   @IsNotEmpty()
-  @IsString()
+  @IsEnum(RECEIPT_TYPE)
   type: RECEIPT_TYPE;
 
   @IsDefined()
@@ -55,6 +56,13 @@ export class CreateReceiptDto {
 }
 
 export class CreatePaymentDto {
+  @IsDefined()
+  @IsNotEmpty()
+  @IsNumber()
   amount: number;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @IsEnum(PAYMENT_TYPE)
   type: PAYMENT_TYPE;
 }

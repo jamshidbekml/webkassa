@@ -1,8 +1,9 @@
 import { Controller, Req, Body, Query, Param } from '@nestjs/common';
 import { ReceiptsService } from './receipts.service';
-import { CreateReceiptDto } from './dto/create-receipt.dto';
+import { CreatePaymentDto, CreateReceiptDto } from './dto/create-receipt.dto';
 import { Request } from 'express';
 import {
+  AddPayment,
   CreateReceipt,
   GetAllReceipts,
   GetReceipt,
@@ -48,5 +49,15 @@ export class ReceiptsController {
   @GetReceipt(':id')
   findOne(@Param('id') id: string) {
     return this.receiptsService.findOneReceipt(id);
+  }
+
+  @AddPayment('add/:saleId')
+  addPayment(
+    @Req() req: Request,
+    @Param('saleId') saleId: string,
+    @Body() body: CreatePaymentDto,
+  ) {
+    const { sub } = req['user'] as { sub: string };
+    return this.receiptsService.createPayment(sub, saleId, body);
   }
 }
