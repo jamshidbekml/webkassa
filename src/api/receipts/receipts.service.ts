@@ -153,7 +153,7 @@ export class ReceiptsService {
 
     await this.prismaService.payments.create({
       data: {
-        amount: +body.amount,
+        amount: +body.amount * 100,
         paymentType: body.type,
         cashierId: userId,
         receiptId: receipt.id,
