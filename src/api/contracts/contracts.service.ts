@@ -254,7 +254,7 @@ export class ContractsService {
           commissionPINFL: null,
           commissionTIN: null,
         })),
-        receipts: contract.receipt,
+        receipt: contract.receipt,
       },
     };
   }
