@@ -187,6 +187,7 @@ model Payments {
   receipt Receipts @relation(fields: [receiptId], references: [id])
   cashierId String @db.Uuid
   cashier Users @relation(fields: [cashierId], references: [id])
+  createdAt DateTime @default(now())
 
   @@map("payments")
 }
