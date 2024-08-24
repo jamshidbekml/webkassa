@@ -218,7 +218,7 @@ export class ContractsService {
             labels: { select: { label: true } },
           },
         },
-        receipts: {
+        receipt: {
           include: { payments: true },
         },
       },
@@ -254,7 +254,7 @@ export class ContractsService {
           commissionPINFL: null,
           commissionTIN: null,
         })),
-        receipts: contract.receipts,
+        receipts: contract.receipt,
       },
     };
   }
@@ -262,10 +262,10 @@ export class ContractsService {
   async remove(id: string) {
     const contract = await this.prismaService.contracts.findUnique({
       where: { id },
-      include: { receipts: true },
+      include: { receipt: true },
     });
 
-    if (contract.receipts.length)
+    if (contract.receipt)
       throw new NotFoundException(
         "Shartnomaga to'lov qilingan, o'chirish mumkin emas",
       );

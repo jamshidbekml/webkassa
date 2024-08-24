@@ -133,7 +133,7 @@ model Contracts {
   branchId String @db.Uuid
   branch Branches @relation(fields: [branchId], references: [id])
   products ContractProducts[]
-  receipts Receipts[]
+  receipt Receipts?
 
   createdAt DateTime @default(now())  
   updatedAt DateTime @updatedAt
@@ -169,7 +169,7 @@ model Receipts {
   type RECEIPT_TYPE
   cashierId String @db.Uuid
   cashier Users @relation(fields: [cashierId], references: [id])
-  contractId String @db.Uuid
+  contractId String @db.Uuid @unique
   contract Contracts @relation(fields: [contractId], references: [id])
   branchId String @db.Uuid
   branch Branches @relation(fields: [branchId], references: [id])
