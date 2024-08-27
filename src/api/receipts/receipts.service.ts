@@ -243,6 +243,7 @@ export class ReceiptsService {
               },
             }),
       },
+      include: { receipt: true },
       skip: (page - 1) * limit,
       take: limit,
     });
