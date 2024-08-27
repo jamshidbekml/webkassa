@@ -79,3 +79,24 @@ export function AddPayment(routeName?: string) {
     Post(routeName),
   );
 }
+
+export function GetAllPayments(routeName?: string) {
+  return applyDecorators(
+    ApiOperation({ summary: 'Get all payments' }),
+    ApiQuery({ name: 'type', required: true, enum: PAYMENT_TYPE }),
+    ApiQuery({ name: 'page', required: false, example: 1 }),
+    ApiQuery({ name: 'limit', required: false, example: 10 }),
+    ApiQuery({ name: 'search', required: false, type: 'string' }),
+    ApiQuery({
+      name: 'from',
+      required: false,
+      description: 'filtering with date, default current day',
+    }),
+    ApiQuery({
+      name: 'to',
+      required: false,
+      description: 'filtering with date, default current day',
+    }),
+    Get(routeName),
+  );
+}

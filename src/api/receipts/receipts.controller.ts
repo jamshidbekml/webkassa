@@ -5,10 +5,11 @@ import { Request } from 'express';
 import {
   AddPayment,
   CreateReceipt,
+  GetAllPayments,
   GetAllReceipts,
   GetReceipt,
 } from './decorators/receipts.decorator';
-import { RECEIPT_TYPE } from '@prisma/client';
+import { PAYMENT_TYPE, RECEIPT_TYPE } from '@prisma/client';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth()
@@ -59,5 +60,28 @@ export class ReceiptsController {
   ) {
     const { sub } = req['user'] as { sub: string };
     return this.receiptsService.createPayment(sub, saleId, body);
+  }
+
+  @GetAllPayments('payments')
+  getAllPayments(
+    @Req() req: Request,
+    @Query('type') type: PAYMENT_TYPE,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('search') search?: string,
+    @Query('from')
+    from?: Date,
+    @Query('to') to?: Date,
+  ) {
+    const { branchId } = req['user'] as { branchId: string };
+    return this.receiptsService.findPayments(
+      branchId,
+      type,
+      +page,
+      +limit,
+      search,
+      from,
+      to,
+    );
   }
 }

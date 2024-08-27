@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreatePaymentDto, CreateReceiptDto } from './dto/create-receipt.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { RECEIPT_TYPE } from '@prisma/client';
+import { PAYMENT_TYPE, RECEIPT_TYPE } from '@prisma/client';
 
 @Injectable()
 export class ReceiptsService {
@@ -63,21 +63,34 @@ export class ReceiptsService {
         type,
         ...(search
           ? {
-              contract: {
-                OR: [
-                  { phone: { contains: search, mode: 'insensitive' } },
-                  { contractId: { contains: search, mode: 'insensitive' } },
-                  {
-                    pinfl: { contains: search, mode: 'insensitive' },
+              OR: [
+                {
+                  contract: {
+                    OR: [
+                      { phone: { contains: search, mode: 'insensitive' } },
+                      { contractId: { contains: search, mode: 'insensitive' } },
+                      {
+                        pinfl: { contains: search, mode: 'insensitive' },
+                      },
+                      {
+                        passportSeries: {
+                          contains: search,
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        clientFullName: {
+                          contains: search,
+                          mode: 'insensitive',
+                        },
+                      },
+                    ],
                   },
-                  {
-                    passportSeries: { contains: search, mode: 'insensitive' },
-                  },
-                  {
-                    clientFullName: { contains: search, mode: 'insensitive' },
-                  },
-                ],
-              },
+                },
+                {
+                  saleId: { contains: search, mode: 'insensitive' },
+                },
+              ],
             }
           : {
               createdAt: {
@@ -161,5 +174,136 @@ export class ReceiptsService {
     });
 
     return `To'lov muvaffaqqiyatli qabul qilindi!`;
+  }
+
+  async findPayments(
+    branchId: string,
+    type: PAYMENT_TYPE,
+    page: number,
+    limit: number,
+    search?: string,
+    startDate?: Date,
+    endDate?: Date,
+  ) {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const effectiveStartDate = startDate ?? todayStart;
+    const effectiveEndDate = endDate ?? todayEnd;
+    const payments = await this.prismaService.payments.findMany({
+      where: {
+        receipt: {
+          branchId,
+        },
+        paymentType: type,
+        ...(search
+          ? {
+              OR: [
+                {
+                  receipt: {
+                    contract: {
+                      OR: [
+                        { phone: { contains: search, mode: 'insensitive' } },
+                        {
+                          contractId: { contains: search, mode: 'insensitive' },
+                        },
+                        {
+                          pinfl: { contains: search, mode: 'insensitive' },
+                        },
+                        {
+                          passportSeries: {
+                            contains: search,
+                            mode: 'insensitive',
+                          },
+                        },
+                        {
+                          clientFullName: {
+                            contains: search,
+                            mode: 'insensitive',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  receipt: {
+                    saleId: { contains: search, mode: 'insensitive' },
+                  },
+                },
+              ],
+            }
+          : {
+              createdAt: {
+                gte: new Date(effectiveStartDate),
+                lte: new Date(effectiveEndDate),
+              },
+            }),
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    const total = await this.prismaService.payments.count({
+      where: {
+        receipt: {
+          branchId,
+        },
+        paymentType: type,
+        ...(search
+          ? {
+              OR: [
+                {
+                  receipt: {
+                    contract: {
+                      OR: [
+                        { phone: { contains: search, mode: 'insensitive' } },
+                        {
+                          contractId: { contains: search, mode: 'insensitive' },
+                        },
+                        {
+                          pinfl: { contains: search, mode: 'insensitive' },
+                        },
+                        {
+                          passportSeries: {
+                            contains: search,
+                            mode: 'insensitive',
+                          },
+                        },
+                        {
+                          clientFullName: {
+                            contains: search,
+                            mode: 'insensitive',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  receipt: {
+                    saleId: { contains: search, mode: 'insensitive' },
+                  },
+                },
+              ],
+            }
+          : {
+              createdAt: {
+                gte: new Date(effectiveStartDate),
+                lte: new Date(effectiveEndDate),
+              },
+            }),
+      },
+    });
+
+    return {
+      data: payments,
+      pageSize: limit,
+      total,
+      current: page,
+    };
   }
 }
