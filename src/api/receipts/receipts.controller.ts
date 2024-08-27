@@ -47,11 +47,6 @@ export class ReceiptsController {
     );
   }
 
-  @GetReceipt(':id')
-  findOne(@Param('id') id: string) {
-    return this.receiptsService.findOneReceipt(id);
-  }
-
   @AddPayment('add/:saleId')
   addPayment(
     @Req() req: Request,
@@ -83,5 +78,10 @@ export class ReceiptsController {
       from,
       to,
     );
+  }
+
+  @GetReceipt(':id')
+  findOne(@Param('id') id: string) {
+    return this.receiptsService.findOneReceipt(id);
   }
 }
