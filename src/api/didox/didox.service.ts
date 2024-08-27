@@ -33,10 +33,14 @@ export class DidoxService {
   async findOneDocument(inn: string, doc_id: string) {
     try {
       const data = await getOneDocument(inn, doc_id);
+      const doc = await this.prismaService.fetchedDocuments.findUnique({
+        where: { doc_id },
+      });
 
       return {
         ...data.data,
         status: DOCUMENT_STATUS[data.data.document.status],
+        fetched: doc?.doc_id ? true : false,
       };
     } catch (err) {
       await this.taskService.tokenUpdater();
