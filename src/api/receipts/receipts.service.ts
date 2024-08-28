@@ -99,15 +99,15 @@ export class ReceiptsService {
               },
             }),
       },
-      include: {
-        contract: {
-          include: {
-            products: {
-              include: { labels: true },
-            },
-          },
-        },
-      },
+      // include: {
+      //   contract: {
+      //     include: {
+      //       products: {
+      //         include: { labels: true },
+      //       },
+      //     },
+      //   },
+      // },
       skip: (page - 1) * limit,
       take: limit,
     });
