@@ -39,6 +39,8 @@ export class ContractsService {
         },
       });
 
+      console.log(product);
+
       if (product?.labels) {
         for await (const label of product.labels) {
           await this.prismaService.contractProductLabels.create({
