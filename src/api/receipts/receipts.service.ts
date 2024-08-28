@@ -55,8 +55,8 @@ export class ReceiptsService {
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
 
-    const effectiveStartDate = startDate ?? todayStart;
-    const effectiveEndDate = endDate ?? todayEnd;
+    const effectiveStartDate = new Date(startDate) ?? todayStart;
+    const effectiveEndDate = new Date(endDate) ?? todayEnd;
     const receipts = await this.prismaService.receipts.findMany({
       where: {
         branchId,
@@ -99,15 +99,15 @@ export class ReceiptsService {
               },
             }),
       },
-      // include: {
-      //   contract: {
-      //     include: {
-      //       products: {
-      //         include: { labels: true },
-      //       },
-      //     },
-      //   },
-      // },
+      include: {
+        contract: {
+          include: {
+            products: {
+              include: { labels: true },
+            },
+          },
+        },
+      },
       skip: (page - 1) * limit,
       take: limit,
     });
