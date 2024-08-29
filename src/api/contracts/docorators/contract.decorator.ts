@@ -23,7 +23,7 @@ export function CreateContract(routeName?: string) {
                 count: { type: 'number' },
                 amount: { type: 'number' },
                 discountAmount: { type: 'number' },
-                labels: { type: 'array', items: { type: 'string' } },
+                label: { type: 'string' },
               },
             },
           },

@@ -45,6 +45,6 @@ export class CreateContractDto {
     count: number;
     amount: number;
     discountAmount: number;
-    labels?: string[];
+    label?: string;
   }[];
 }

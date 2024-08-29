@@ -29,27 +29,42 @@ export class ContractsService {
     });
 
     for await (const product of createContractDto.products) {
-      const contractProduct = await this.prismaService.contractProducts.create({
-        data: {
+      const existProduct = await this.prismaService.contractProducts.findFirst({
+        where: {
           contractId: newContract.id,
           productId: product.productId,
-          amount: product.amount,
-          discountAmount: product.discountAmount,
-          count: product.count,
         },
       });
+      let contractProduct;
+      if (existProduct) {
+        contractProduct = await this.prismaService.contractProducts.update({
+          where: {
+            id: existProduct.id,
+          },
+          data: {
+            count: existProduct.count + product.count,
+            amount: existProduct.amount + product.amount,
+          },
+        });
+      } else {
+        contractProduct = await this.prismaService.contractProducts.create({
+          data: {
+            contractId: newContract.id,
+            productId: product.productId,
+            amount: product.amount,
+            discountAmount: product.discountAmount,
+            count: product.count,
+          },
+        });
+      }
 
-      console.log(product);
-
-      if (product?.labels) {
-        for await (const label of product.labels) {
-          await this.prismaService.contractProductLabels.create({
-            data: {
-              contractProductId: contractProduct.id,
-              label,
-            },
-          });
-        }
+      if (product?.label) {
+        await this.prismaService.contractProductLabels.create({
+          data: {
+            contractProductId: contractProduct.id,
+            label: product.label,
+          },
+        });
       }
     }
 
@@ -246,7 +261,7 @@ export class ContractsService {
           name: product.product.name,
           packageCode: product.product.packagecode,
           vat: Number(product.product.vat) / 100,
-          price: product.amount * 100,
+          price: Math.ceil(product.amount * 100) / product.count,
           amount: product.count,
           discountAmount: 0,
           labels: product.labels.map((e) => e.label),
