@@ -2,15 +2,15 @@ import { Expose, Transform } from 'class-transformer';
 
 export class GetReceiptsDto {
   @Expose()
-  @Transform(({ obj }) => obj.contract.saleId)
   saleId: number;
 
   @Expose()
-  @Transform(({ obj }) => obj.contract.payments)
   payments: any[];
 
   @Expose()
   @Transform(({ obj }) => {
+    console.log(obj);
+
     return obj.contract.products.map((e) => ({
       id: e.product.id,
       name: e.product.name,
