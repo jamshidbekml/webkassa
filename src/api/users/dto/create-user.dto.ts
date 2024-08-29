@@ -28,7 +28,19 @@ export class CreateUserDto {
   @IsDefined()
   @IsNotEmpty()
   @IsString()
-  name: string;
+  firstName: string;
+
+  @ApiProperty({ description: `Field to enter user's name`, required: true })
+  @IsDefined()
+  @IsNotEmpty()
+  @IsString()
+  lastName: string;
+
+  @ApiProperty({ description: `Field to enter user's name`, required: true })
+  @IsDefined()
+  @IsNotEmpty()
+  @IsString()
+  middleName: string;
 
   @ApiProperty({
     description: `Field to enter user's role`,

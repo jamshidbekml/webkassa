@@ -22,7 +22,9 @@ async function seed() {
           username: admin.username,
           password: admin.password,
           role: 'superadmin',
-          name: 'Super Admin',
+          firstName: 'Jamshidbek',
+          lastName: 'Odiljonov',
+          middleName: "Nodirbek og'li",
         },
       });
       console.log('Data seeded successfully'.bgGreen.bold);

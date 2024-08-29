@@ -34,7 +34,9 @@ model Users {
   id String @id @default(uuid()) @db.Uuid
   username     String  @unique
   password     String
-  name         String
+  firstName    String
+  lastName     String
+  middleName   String
   satId Int?
   refreshToken String?
   role         ROLE    @default(cashier)

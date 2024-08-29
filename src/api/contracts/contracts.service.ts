@@ -62,6 +62,17 @@ export class ContractsService {
             });
           }
 
+          await prisma.products.update({
+            where: {
+              id: product.productId,
+            },
+            data: {
+              count: {
+                decrement: 1,
+              },
+            },
+          });
+
           if (product?.label) {
             await prisma.contractProductLabels.create({
               data: {
@@ -289,7 +300,7 @@ export class ContractsService {
   async remove(id: string) {
     const contract = await this.prismaService.contracts.findUnique({
       where: { id },
-      include: { receipt: true },
+      include: { receipt: true, products: true },
     });
 
     if (contract.receipt)
@@ -297,6 +308,16 @@ export class ContractsService {
         "Shartnomaga to'lov qilingan, o'chirish mumkin emas",
       );
 
+    for await (const product of contract.products) {
+      await this.prismaService.products.update({
+        where: { id: product.productId },
+        data: {
+          count: {
+            increment: 1,
+          },
+        },
+      });
+    }
     await this.prismaService.contracts.delete({ where: { id } });
 
     return "Shartnoma muvaffaqqiyatli o'chirildi";

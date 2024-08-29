@@ -26,7 +26,9 @@ export class UsersService {
       data,
       select: {
         id: true,
-        name: true,
+        firstName: true,
+        lastName: true,
+        middleName: true,
         username: true,
         role: true,
         createdAt: true,
@@ -58,7 +60,9 @@ export class UsersService {
       where: { id },
       select: {
         id: true,
-        name: true,
+        firstName: true,
+        lastName: true,
+        middleName: true,
         username: true,
         role: true,
         createdAt: true,
@@ -95,7 +99,9 @@ export class UsersService {
       data,
       select: {
         id: true,
-        name: true,
+        firstName: true,
+        lastName: true,
+        middleName: true,
         username: true,
         createdAt: true,
         updatedAt: true,
@@ -122,14 +128,6 @@ export class UsersService {
       where: {
         id,
       },
-      select: {
-        id: true,
-        name: true,
-        username: true,
-        createdAt: true,
-        updatedAt: true,
-        role: true,
-      },
     });
 
     return {
@@ -146,7 +144,9 @@ export class UsersService {
         ...(search
           ? {
               OR: [
-                { name: { contains: search, mode: 'insensitive' } },
+                { firstName: { contains: search, mode: 'insensitive' } },
+                { lastName: { contains: search, mode: 'insensitive' } },
+                { middleName: { contains: search, mode: 'insensitive' } },
                 { username: { contains: search, mode: 'insensitive' } },
               ],
             }
@@ -157,7 +157,9 @@ export class UsersService {
       },
       select: {
         id: true,
-        name: true,
+        firstName: true,
+        lastName: true,
+        middleName: true,
         username: true,
         createdAt: true,
         updatedAt: true,
@@ -170,7 +172,9 @@ export class UsersService {
         ...(search
           ? {
               OR: [
-                { name: { contains: search, mode: 'insensitive' } },
+                { firstName: { contains: search, mode: 'insensitive' } },
+                { lastName: { contains: search, mode: 'insensitive' } },
+                { middleName: { contains: search, mode: 'insensitive' } },
                 { username: { contains: search, mode: 'insensitive' } },
               ],
             }

@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreatePaymentDto, CreateReceiptDto } from './dto/create-receipt.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { PAYMENT_TYPE, RECEIPT_TYPE } from '@prisma/client';
+import { writeTransactionToSat } from '../shared/utils/write-payment-to-sat';
 
 @Injectable()
 export class ReceiptsService {
@@ -36,6 +37,17 @@ export class ReceiptsService {
               paymentType: payment.paymentType,
               cashierId: userId,
             },
+          });
+
+          const user = await prisma.users.findUnique({
+            where: { id: userId },
+          });
+          await writeTransactionToSat({
+            amount: payment.amount / 100,
+            type: payment.paymentType,
+            contractid: createReceiptDto.contractId,
+            user: `${user.firstName} ${user.lastName} ${user.middleName}`,
+            userId: user.satId,
           });
         }
 
@@ -170,9 +182,9 @@ export class ReceiptsService {
     const receipt = await this.prismaService.receipts.findUnique({
       where: { id },
       include: {
-        cashier: { select: { name: true } },
+        cashier: { select: { firstName: true, lastName: true } },
         payments: {
-          include: { cashier: { select: { name: true } } },
+          include: { cashier: { select: { firstName: true, lastName: true } } },
         },
       },
     });
@@ -182,22 +194,47 @@ export class ReceiptsService {
   }
 
   async createPayment(userId: string, saleId: string, body: CreatePaymentDto) {
-    const receipt = await this.prismaService.receipts.findUnique({
-      where: { saleId },
-    });
+    try {
+      const receipt = await this.prismaService.receipts.findUnique({
+        where: { saleId },
+        include: {
+          contract: {
+            select: {
+              contractId: true,
+            },
+          },
+        },
+      });
 
-    if (!receipt) throw new BadRequestException('Bunday savdo cheki topilmadi');
+      if (!receipt)
+        throw new BadRequestException('Bunday savdo cheki topilmadi');
 
-    await this.prismaService.payments.create({
-      data: {
-        amount: +body.amount * 100,
-        paymentType: body.type,
-        cashierId: userId,
-        receiptId: receipt.id,
-      },
-    });
+      await this.prismaService.$transaction(async (prisma) => {
+        await prisma.payments.create({
+          data: {
+            amount: +body.amount * 100,
+            paymentType: body.type,
+            cashierId: userId,
+            receiptId: receipt.id,
+          },
+        });
 
-    return `To'lov muvaffaqqiyatli qabul qilindi!`;
+        const user = await prisma.users.findUnique({
+          where: { id: userId },
+        });
+        await writeTransactionToSat({
+          amount: body.amount,
+          type: body.type,
+          contractid: receipt.contract.contractId,
+          user: `${user.firstName} ${user.lastName} ${user.middleName}`,
+          userId: user.satId,
+        });
+      });
+
+      return `To'lov muvaffaqqiyatli qabul qilindi!`;
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
   }
 
   async findPayments(
