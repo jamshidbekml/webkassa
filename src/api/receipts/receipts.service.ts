@@ -106,11 +106,11 @@ export class ReceiptsService {
               },
             }),
       },
-      include: {
+      select: {
         contract: {
-          include: {
+          select: {
             products: {
-              include: { labels: true },
+              select: { product: true, labels: true },
             },
           },
         },
