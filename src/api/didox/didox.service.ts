@@ -116,26 +116,17 @@ export class DidoxService {
               }
             }
           } else {
-            console.log({
-              name: product.name,
-              barcode: product.barcode,
-              packagecode: product.packagecode,
-              count: +product.count,
-              vat: product.vatrate,
-              categoryId: category.id,
-              branchId: branch.id,
-              catalogcode: product.catalogcode,
-            });
-
-            const newProduct = await this.productService.create({
-              name: product.name,
-              barcode: product.barcode,
-              packagecode: product.packagecode,
-              count: +product.count,
-              vat: product.vatrate,
-              categoryId: category.id,
-              branchId: branch.id,
-              catalogcode: product.catalogcode,
+            const newProduct = await prisma.products.create({
+              data: {
+                name: product.name,
+                barcode: product.barcode,
+                packagecode: product.packagecode,
+                count: +product.count,
+                vat: product.vatrate,
+                categoryId: category.id,
+                branchId: branch.id,
+                catalogcode: product.catalogcode,
+              },
             });
 
             if (product.marks?.kiz) {
@@ -145,6 +136,7 @@ export class DidoxService {
                   isMarked: true,
                 },
               });
+
               for await (const mark of product.marks.kiz) {
                 await prisma.productMarks.create({
                   data: {

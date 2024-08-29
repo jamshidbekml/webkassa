@@ -11,6 +11,7 @@ export async function writeTransactionToSat(payload: {
   comment: string;
 }) {
   try {
+    console.log(payload);
   } catch (err) {
     throw new BadRequestException(err.message);
   }
