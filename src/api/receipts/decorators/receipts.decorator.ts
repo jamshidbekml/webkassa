@@ -59,10 +59,10 @@ export function GetAllReceipts(routeName?: string) {
 
 export function GetReceipt(routeName?: string) {
   return applyDecorators(
-    NestedSerialize(GetReceiptsDto),
     ApiOperation({ summary: 'Find receipt' }),
     ApiParam({ name: 'id', type: 'string' }),
     Get(routeName),
+    NestedSerialize(GetReceiptsDto),
   );
 }
 
