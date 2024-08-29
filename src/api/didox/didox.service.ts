@@ -49,100 +49,107 @@ export class DidoxService {
   }
 
   async createProducts(inn: string, docId: string) {
-    const doc = await this.prismaService.fetchedDocuments.findUnique({
-      where: { doc_id: docId },
-    });
-    if (doc)
-      throw new BadRequestException('Maxsulotlar allaqachon qo`shilgan!');
-
-    const {
-      document: { status, doc_id, doctype },
-      json: {
-        productlist: { products },
-      },
-    } = await this.findOneDocument(inn, docId);
-
-    if (status !== 3) throw new BadRequestException('Faktura tasdiqlanmagan!');
-    if (doctype !== '002')
-      throw new BadRequestException('Bu fakturdan kirim qila olmaysiz!');
-
-    for await (const product of products) {
-      const branch = await this.prismaService.branches.findUnique({
-        where: { inn },
+    try {
+      const doc = await this.prismaService.fetchedDocuments.findUnique({
+        where: { doc_id: docId },
       });
-      let category = await this.prismaService.categories.findUnique({
-        where: { code: product.catalogcode.slice(0, 5) },
-      });
-      if (!category) {
-        const catalogName = await getCategoryName(
-          product.catalogcode.slice(0, 5),
-        );
+      if (doc)
+        throw new BadRequestException('Maxsulotlar allaqachon qo`shilgan!');
 
-        category = await this.prismaService.categories.create({
-          data: {
-            code: product.catalogcode.slice(0, 5),
-            name: catalogName,
-            branchId: branch.id,
-          },
-        });
-      }
-      const existProduct = await this.prismaService.products.findFirst({
-        where: { name: product.name },
-      });
+      const {
+        document: { status, doc_id, doctype },
+        json: {
+          productlist: { products },
+        },
+      } = await this.findOneDocument(inn, docId);
 
-      if (existProduct && existProduct.name == product.name) {
-        await this.prismaService.products.update({
-          where: { id: existProduct.id },
-          data: { count: existProduct.count + Number(product.count) },
-        });
+      if (status !== 3)
+        throw new BadRequestException('Faktura tasdiqlanmagan!');
+      if (doctype !== '002')
+        throw new BadRequestException('Bu fakturdan kirim qila olmaysiz!');
 
-        if (product.marks?.kiz) {
-          await this.prismaService.products.update({
-            where: { id: existProduct.id },
-            data: {
-              isMarked: true,
-            },
+      await this.prismaService.$transaction(async (prisma) => {
+        for await (const product of products) {
+          const branch = await prisma.branches.findUnique({
+            where: { inn },
           });
-          for await (const mark of product.marks.kiz) {
-            await this.prismaService.productMarks.create({
+          let category = await prisma.categories.findUnique({
+            where: { code: product.catalogcode.slice(0, 5) },
+          });
+          if (!category) {
+            const catalogName = await getCategoryName(
+              product.catalogcode.slice(0, 5),
+            );
+
+            category = await prisma.categories.create({
               data: {
-                label: mark,
-                productId: existProduct.id,
+                code: product.catalogcode.slice(0, 5),
+                name: catalogName,
+                branchId: branch.id,
               },
             });
           }
-        }
-      } else {
-        const newProduct = await this.productService.create({
-          name: product.name,
-          barcode: product.barcode,
-          packagecode: product.packagecode,
-          count: +product.count,
-          vat: product.vatrate,
-          categoryId: category.id,
-          branchId: branch.id,
-          catalogcode: product.catalogcode,
-        });
-
-        if (product.marks?.kiz) {
-          await this.prismaService.products.update({
-            where: { id: newProduct.id },
-            data: {
-              isMarked: true,
-            },
+          const existProduct = await prisma.products.findFirst({
+            where: { name: product.name },
           });
-          for await (const mark of product.marks.kiz) {
-            await this.prismaService.productMarks.create({
-              data: {
-                label: mark,
-                productId: newProduct.id,
-              },
+
+          if (existProduct && existProduct.name == product.name) {
+            await prisma.products.update({
+              where: { id: existProduct.id },
+              data: { count: existProduct.count + Number(product.count) },
             });
+
+            if (product.marks?.kiz) {
+              await prisma.products.update({
+                where: { id: existProduct.id },
+                data: {
+                  isMarked: true,
+                },
+              });
+              for await (const mark of product.marks.kiz) {
+                await prisma.productMarks.create({
+                  data: {
+                    label: mark,
+                    productId: existProduct.id,
+                  },
+                });
+              }
+            }
+          } else {
+            const newProduct = await this.productService.create({
+              name: product.name,
+              barcode: product.barcode,
+              packagecode: product.packagecode,
+              count: +product.count,
+              vat: product.vatrate,
+              categoryId: category.id,
+              branchId: branch.id,
+              catalogcode: product.catalogcode,
+            });
+
+            if (product.marks?.kiz) {
+              await prisma.products.update({
+                where: { id: newProduct.id },
+                data: {
+                  isMarked: true,
+                },
+              });
+              for await (const mark of product.marks.kiz) {
+                await prisma.productMarks.create({
+                  data: {
+                    label: mark,
+                    productId: newProduct.id,
+                  },
+                });
+              }
+            }
           }
         }
-      }
+
+        await prisma.fetchedDocuments.create({ data: { doc_id } });
+      });
+    } catch (err) {
+      throw new BadRequestException(err.message);
     }
-
-    await this.prismaService.fetchedDocuments.create({ data: { doc_id } });
   }
 }

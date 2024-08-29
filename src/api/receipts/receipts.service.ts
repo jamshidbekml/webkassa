@@ -12,32 +12,38 @@ export class ReceiptsService {
     userId: string,
     branchId: string,
   ) {
-    const receipt = await this.prismaService.receipts.create({
-      data: {
-        cashierId: userId,
-        branchId,
-        contractId: createReceiptDto.contractId,
-        cTin: createReceiptDto.cTin,
-        cName: createReceiptDto.cName,
-        tAmount: createReceiptDto.tAmount * 100,
-        tVat: createReceiptDto.tVat * 100,
-        saleId: createReceiptDto.saleId,
-        type: createReceiptDto.type,
-      },
-    });
+    try {
+      await this.prismaService.$transaction(async (prisma) => {
+        const receipt = await prisma.receipts.create({
+          data: {
+            cashierId: userId,
+            branchId,
+            contractId: createReceiptDto.contractId,
+            cTin: createReceiptDto.cTin,
+            cName: createReceiptDto.cName,
+            tAmount: createReceiptDto.tAmount * 100,
+            tVat: createReceiptDto.tVat * 100,
+            saleId: createReceiptDto.saleId,
+            type: createReceiptDto.type,
+          },
+        });
 
-    for await (const payment of createReceiptDto.payments) {
-      await this.prismaService.payments.create({
-        data: {
-          receiptId: receipt.id,
-          amount: payment.amount,
-          paymentType: payment.paymentType,
-          cashierId: userId,
-        },
+        for await (const payment of createReceiptDto.payments) {
+          await prisma.payments.create({
+            data: {
+              receiptId: receipt.id,
+              amount: payment.amount,
+              paymentType: payment.paymentType,
+              cashierId: userId,
+            },
+          });
+        }
+
+        return { data: receipt };
       });
+    } catch (err) {
+      throw new BadRequestException(err.message);
     }
-
-    return { data: receipt };
   }
 
   async findAll(

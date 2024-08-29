@@ -7,68 +7,76 @@ import { CreateContractDto } from './dto/create-contract.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { getContractProductsFromSat } from '../shared/utils/get-contract-products-from-sat';
 import { getContractGraphFromSat } from '../shared/utils/get-contract-graph';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ContractsService {
   constructor(private readonly prismaService: PrismaService) {}
   async create(createContractDto: CreateContractDto, branchId: string) {
-    const isExist = await this.prismaService.contracts.findUnique({
-      where: { contractId: createContractDto.contractId },
-    });
-    if (isExist) throw new BadRequestException('Bunday shartnoma mavjud');
-    const newContract = await this.prismaService.contracts.create({
-      data: {
-        branchId,
-        contractId: createContractDto.contractId,
-        phone: createContractDto.phone,
-        secondPhone: createContractDto.secondPhone,
-        pinfl: createContractDto.pinfl,
-        passportSeries: createContractDto.passportSeries,
-        clientFullName: createContractDto.clientFullName,
-      },
-    });
-
-    for await (const product of createContractDto.products) {
-      const existProduct = await this.prismaService.contractProducts.findFirst({
-        where: {
-          contractId: newContract.id,
-          productId: product.productId,
-        },
+    try {
+      const isExist = await this.prismaService.contracts.findUnique({
+        where: { contractId: createContractDto.contractId },
       });
-      let contractProduct;
-      if (existProduct) {
-        contractProduct = await this.prismaService.contractProducts.update({
-          where: {
-            id: existProduct.id,
-          },
-          data: {
-            count: existProduct.count + product.count,
-            amount: existProduct.amount + product.amount,
-          },
-        });
-      } else {
-        contractProduct = await this.prismaService.contractProducts.create({
-          data: {
-            contractId: newContract.id,
-            productId: product.productId,
-            amount: product.amount,
-            discountAmount: product.discountAmount,
-            count: product.count,
-          },
-        });
-      }
+      if (isExist) throw new BadRequestException('Bunday shartnoma mavjud');
 
-      if (product?.label) {
-        await this.prismaService.contractProductLabels.create({
+      await this.prismaService.$transaction(async (prisma) => {
+        const newContract = await prisma.contracts.create({
           data: {
-            contractProductId: contractProduct.id,
-            label: product.label,
+            branchId,
+            contractId: createContractDto.contractId,
+            phone: createContractDto.phone,
+            secondPhone: createContractDto.secondPhone,
+            pinfl: createContractDto.pinfl,
+            passportSeries: createContractDto.passportSeries,
+            clientFullName: createContractDto.clientFullName,
           },
         });
-      }
+
+        for await (const product of createContractDto.products) {
+          const existProduct = await prisma.contractProducts.findFirst({
+            where: {
+              contractId: newContract.id,
+              productId: product.productId,
+            },
+          });
+          let contractProduct;
+          if (existProduct) {
+            contractProduct = await prisma.contractProducts.update({
+              where: {
+                id: existProduct.id,
+              },
+              data: {
+                count: existProduct.count + product.count,
+                amount: existProduct.amount + product.amount,
+              },
+            });
+          } else {
+            contractProduct = await prisma.contractProducts.create({
+              data: {
+                contractId: newContract.id,
+                productId: product.productId,
+                amount: product.amount,
+                discountAmount: product.discountAmount,
+                count: product.count,
+              },
+            });
+          }
+
+          if (product?.label) {
+            await prisma.contractProductLabels.create({
+              data: {
+                contractProductId: contractProduct.id,
+                label: product.label,
+              },
+            });
+          }
+        }
+
+        return 'Shartnoma yaratildi!';
+      });
+    } catch (err) {
+      throw new BadRequestException(err.message);
     }
-
-    return 'Shartnoma yaratildi!';
   }
 
   async getContractProducts(contractId: string) {
@@ -94,6 +102,7 @@ export class ContractsService {
 
       labels[foundProduct.id] = foundProduct.labels.map((e) => e.label);
       products.push({
+        uid: uuidv4(),
         id: foundProduct.id,
         name: foundProduct.name,
         isMarked: foundProduct.isMarked,
@@ -122,11 +131,12 @@ export class ContractsService {
 
       labels[foundProduct.id] = foundProduct.labels.map((e) => e.label);
       products.push({
+        uid: uuidv4(),
         id: foundProduct.id,
         name: foundProduct.name,
         isMarked: foundProduct.isMarked,
         amount: product.summa,
-        discountAmount: 0,
+        discountAmount: product.summa,
         count: 1,
       });
     }
