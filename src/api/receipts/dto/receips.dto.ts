@@ -2,6 +2,11 @@ import { Expose, Transform } from 'class-transformer';
 
 export class GetReceiptsDto {
   @Expose()
+  @Transform(({ obj }) => {
+    console.log(obj);
+
+    return obj.saleId;
+  })
   saleId: number;
 
   @Expose()
