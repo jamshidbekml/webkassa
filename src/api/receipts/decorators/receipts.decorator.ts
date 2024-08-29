@@ -1,6 +1,8 @@
 import { applyDecorators, Get, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { PAYMENT_TYPE, RECEIPT_TYPE } from '@prisma/client';
+import { NestedSerialize } from 'src/api/interceptors/nested-serialize.interceptor';
+import { GetReceiptsDto } from '../dto/receips.dto';
 
 export function CreateReceipt(routeName?: string) {
   return applyDecorators(
@@ -57,6 +59,7 @@ export function GetAllReceipts(routeName?: string) {
 
 export function GetReceipt(routeName?: string) {
   return applyDecorators(
+    NestedSerialize(GetReceiptsDto),
     ApiOperation({ summary: 'Find receipt' }),
     ApiParam({ name: 'id', type: 'string' }),
     Get(routeName),
