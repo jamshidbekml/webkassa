@@ -120,6 +120,7 @@ export class ReceiptsService {
             },
           },
         },
+        payments: true,
         cTin: true,
         cName: true,
         tAmount: true,
