@@ -116,6 +116,17 @@ export class DidoxService {
               }
             }
           } else {
+            console.log({
+              name: product.name,
+              barcode: product.barcode,
+              packagecode: product.packagecode,
+              count: +product.count,
+              vat: product.vatrate,
+              categoryId: category.id,
+              branchId: branch.id,
+              catalogcode: product.catalogcode,
+            });
+
             const newProduct = await this.productService.create({
               name: product.name,
               barcode: product.barcode,
