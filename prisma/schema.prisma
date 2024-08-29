@@ -154,7 +154,7 @@ model ContractProducts {
 
 model ContractProductLabels {
   id String @id @default(uuid()) @db.Uuid
-  label String
+  label String @unique
   contractProductId String @db.Uuid
   contractProduct ContractProducts @relation(fields: [contractProductId], references: [id], onDelete: Cascade)
 }
