@@ -110,7 +110,7 @@ export class ReceiptsService {
         contract: {
           select: {
             products: {
-              select: { product: true, labels: true },
+              select: { product: true, labels: { select: { label: true } } },
             },
           },
         },
