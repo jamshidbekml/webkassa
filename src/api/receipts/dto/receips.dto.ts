@@ -28,5 +28,5 @@ export class GetReceiptsDto {
       commissionTIN: null,
     }));
   })
-  products: number;
+  products: any[];
 }
