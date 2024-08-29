@@ -61,10 +61,8 @@ export class ReceiptsService {
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
 
-    const effectiveStartDate = new Date(startDate) ?? todayStart;
-    const effectiveEndDate = new Date(endDate) ?? todayEnd;
-    console.log(effectiveEndDate);
-    console.log(effectiveStartDate);
+    const effectiveStartDate = startDate ? new Date(startDate) : todayStart;
+    const effectiveEndDate = endDate ? new Date(endDate) : todayEnd;
 
     const receipts = await this.prismaService.receipts.findMany({
       where: {
