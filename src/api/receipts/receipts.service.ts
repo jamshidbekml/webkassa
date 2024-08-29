@@ -63,6 +63,9 @@ export class ReceiptsService {
 
     const effectiveStartDate = new Date(startDate) ?? todayStart;
     const effectiveEndDate = new Date(endDate) ?? todayEnd;
+    console.log(effectiveEndDate);
+    console.log(effectiveStartDate);
+
     const receipts = await this.prismaService.receipts.findMany({
       where: {
         branchId,
