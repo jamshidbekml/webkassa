@@ -11,6 +11,8 @@ import {
 } from './decorators/receipts.decorator';
 import { PAYMENT_TYPE, RECEIPT_TYPE } from '@prisma/client';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { GetReceiptsDto } from './dto/receips.dto';
+import { NestedSerialize } from '../interceptors/nested-serialize.interceptor';
 
 @ApiBearerAuth()
 @ApiTags('receipts')
@@ -25,6 +27,7 @@ export class ReceiptsController {
   }
 
   @GetAllReceipts()
+  @NestedSerialize(GetReceiptsDto)
   findAll(
     @Req() req: Request,
     @Query('type') type: RECEIPT_TYPE,
