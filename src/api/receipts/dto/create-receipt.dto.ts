@@ -58,7 +58,7 @@ export class CreateReceiptDto {
   @IsOptional()
   @IsNotEmpty()
   @IsArray()
-  products: { productId: string; count: number }[];
+  products?: { productId: string; count: number }[];
 }
 
 export class CreatePaymentDto {

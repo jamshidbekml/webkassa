@@ -108,6 +108,11 @@ export class ProductsService {
         ...(search && {
           name: { contains: search, mode: 'insensitive' },
         }),
+        ...(status && status === 'active'
+          ? { count: { gte: 1 } }
+          : {
+              count: 0,
+            }),
       },
       skip: (page - 1) * limit,
       take: limit,
