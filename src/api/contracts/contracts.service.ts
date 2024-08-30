@@ -203,6 +203,7 @@ export class ContractsService {
               ],
             }
           : {}),
+        previous: false,
       },
     });
 
