@@ -27,4 +27,28 @@ export class GetReceiptsDto {
     }));
   })
   products: any[];
+
+  @Expose()
+  @Transform(({ obj }) => {
+    return obj.contract.clientFullName;
+  })
+  clientFullName: string;
+
+  @Expose()
+  @Transform(({ obj }) => {
+    return obj.contract.contractId;
+  })
+  contractId: string;
+
+  @Expose()
+  @Transform(({ obj }) => {
+    return obj.contract.phone;
+  })
+  phone: string;
+
+  @Expose()
+  @Transform(({ obj }) => {
+    return obj.contract.secondPhone;
+  })
+  secondPhone: string;
 }
