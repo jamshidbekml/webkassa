@@ -122,7 +122,7 @@ export class DidoxService {
                 barcode: product.barcode,
                 packagecode: product.packagecode,
                 count: +product.count,
-                vat: product.vatrate,
+                vat: +product.vatrate,
                 categoryId: category.id,
                 branchId: branch.id,
                 catalogcode: product.catalogcode,
