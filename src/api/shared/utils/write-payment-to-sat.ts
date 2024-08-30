@@ -12,6 +12,10 @@ export async function writeTransactionToSat(payload: {
 }) {
   try {
     const config = new ConfigService();
+    const token = Buffer.from(
+      `${config.get('SAT_USERNAME')}:${config.get('SAT_PASSWORD')}`,
+    ).toString('base64');
+
     const {
       data: { success },
     } = await axios.post<{ success: boolean }>(
@@ -25,7 +29,7 @@ export async function writeTransactionToSat(payload: {
       },
       {
         headers: {
-          Authorization: `Bearer ${config.get('SAT_TOKEN')}`,
+          Authorization: `Bearer ${token}`,
         },
       },
     );
