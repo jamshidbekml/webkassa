@@ -90,11 +90,13 @@ export class ProductsService {
         ...(search && {
           name: { contains: search, mode: 'insensitive' },
         }),
-        ...(status && status === 'active'
-          ? { count: { gte: 1 } }
-          : {
-              count: 0,
-            }),
+        ...(status
+          ? status === 'active'
+            ? { count: { gte: 1 } }
+            : {
+                count: 0,
+              }
+          : {}),
       },
     });
 
