@@ -1,30 +1,15 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Query,
-  Req,
-  // Get,
-  // Post,
-  // Body,
-  // Patch,
-  // Param,
-  // Delete,
-} from '@nestjs/common';
+import { Body, Controller, Query, Req } from '@nestjs/common';
 import { ProductsService } from './products.service';
-// import { CreateProductDto } from './dto/create-product.dto';
-// import { UpdateProductDto } from './dto/update-product.dto';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { NestedSerialize } from '../interceptors/nested-serialize.interceptor';
 import { ProductsResDto } from './dto/products.dto';
 import { Request } from 'express';
 import { CreateProductDto } from './dto/create-product.dto';
+import {
+  CreateProduct,
+  FindAll,
+  FindAllBlack,
+} from './decorators/products.decorator';
 
 @ApiBearerAuth()
 @ApiTags('products')
@@ -32,18 +17,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  // @Post()
-  // create(@Body() createProductDto: CreateProductDto) {
-  //   return this.productsService.create(createProductDto);
-  // }
-
-  @Get()
-  @ApiOperation({ summary: 'Get all products' })
-  @ApiQuery({ name: 'categoryId', type: String, required: false })
-  @ApiQuery({ name: 'search', type: String, required: false })
-  @ApiQuery({ name: 'label', type: String, required: false })
-  @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
-  @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
+  @FindAll()
   @NestedSerialize(ProductsResDto)
   findAll(
     @Req() req: Request,
@@ -64,8 +38,19 @@ export class ProductsController {
     );
   }
 
-  @Post('manual')
-  @ApiOperation({ summary: 'Create product manually' })
+  @FindAllBlack('black')
+  @NestedSerialize(ProductsResDto)
+  findAllBlack(
+    @Req() req: Request,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('search') search?: string,
+  ) {
+    const { branchId } = req['user'] as { branchId: string };
+    return this.productsService.findAllBlack(+page, +limit, branchId, search);
+  }
+
+  @CreateProduct('manual')
   createManual(@Req() req: Request, @Body() body: CreateProductDto) {
     const { branchId } = req['user'] as { branchId: string };
     return this.productsService.createManual(body, branchId);

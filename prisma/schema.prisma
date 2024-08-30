@@ -97,7 +97,7 @@ model Products {
   barcode String
   packagecode String
   catalogcode String
-  vat Decimal
+  vat Int
   amount Int @default(0)
   discountAmount Int @default(0)
   count Int

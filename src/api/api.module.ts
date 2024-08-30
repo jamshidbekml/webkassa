@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { BranchesModule } from './branches/branches.module';
 import { ProductsModule } from './products/products.module';
@@ -16,6 +16,10 @@ import { ContractsModule } from './contracts/contracts.module';
 import { ReceiptsModule } from './receipts/receipts.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TerminalsModule } from './terminals/terminals.module';
+import { ExcelModule } from './excel/excel.module';
+import { ExcelService } from './excel/excel.service';
+import { join } from 'path';
+import { PrismaService } from './prisma/prisma.service';
 
 @Module({
   imports: [
@@ -32,6 +36,7 @@ import { TerminalsModule } from './terminals/terminals.module';
     ContractsModule,
     ReceiptsModule,
     TerminalsModule,
+    ExcelModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: AccessTokenGuard },
@@ -39,4 +44,36 @@ import { TerminalsModule } from './terminals/terminals.module';
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
   ],
 })
-export class ApiModule {}
+export class ApiModule implements OnModuleInit {
+  constructor(
+    private readonly exelService: ExcelService,
+    private readonly prismaService: PrismaService,
+  ) {}
+  async onModuleInit() {
+    const { Лист1: data } = this.exelService.convertExcelToJson(
+      join(__dirname, '..', '..', '..', 'products.xlsx'),
+    );
+
+    const newData: {
+      name: string;
+      catalogcode: string;
+      packagecode: string;
+      count: number;
+      barcode: string;
+      vat: number;
+    }[] = data.map((e) => ({
+      name: e.махсулотноми,
+      catalogcode: e.МИХК.slice(0, 17),
+      packagecode: e.Упаковка.slice(-7),
+      count: 50,
+      barcode: '',
+      vat: 12,
+    }));
+
+    for await (const product of newData) {
+      await this.prismaService.products.create({
+        data: { ...product, branchId: '', categoryId: '' },
+      });
+    }
+  }
+}

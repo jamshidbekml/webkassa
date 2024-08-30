@@ -25,6 +25,7 @@ export class ProductsService {
   ) {
     const total = await this.prismaService.products.count({
       where: {
+        black: false,
         branchId,
         ...(search && {
           name: { contains: search, mode: 'insensitive' },
@@ -51,6 +52,7 @@ export class ProductsService {
         },
       },
       where: {
+        black: false,
         branchId,
         ...(search && {
           name: { contains: search, mode: 'insensitive' },
@@ -62,6 +64,45 @@ export class ProductsService {
               label: { contains: label, mode: 'insensitive' },
             },
           },
+        }),
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      data: products,
+      total,
+      pageSize: limit,
+      current: page,
+    };
+  }
+
+  async findAllBlack(
+    page: number,
+    limit: number,
+    branchId: string,
+    search?: string,
+  ) {
+    const total = await this.prismaService.products.count({
+      where: {
+        black: true,
+        branchId,
+        ...(search && {
+          name: { contains: search, mode: 'insensitive' },
+        }),
+      },
+    });
+
+    const products = await this.prismaService.products.findMany({
+      include: {
+        labels: true,
+      },
+      where: {
+        black: true,
+        branchId,
+        ...(search && {
+          name: { contains: search, mode: 'insensitive' },
         }),
       },
       skip: (page - 1) * limit,
