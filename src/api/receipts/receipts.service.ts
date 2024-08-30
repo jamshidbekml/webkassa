@@ -18,59 +18,69 @@ export class ReceiptsService {
     branchId: string,
   ) {
     try {
-      await this.prismaService.$transaction(async (prisma) => {
-        const receipt = await prisma.receipts.create({
-          data: {
-            cashierId: userId,
-            branchId,
-            contractId: createReceiptDto.contractId,
-            cTin: createReceiptDto.cTin,
-            cName: createReceiptDto.cName,
-            tAmount: createReceiptDto.tAmount * 100,
-            tVat: createReceiptDto.tVat * 100,
-            saleId: createReceiptDto.saleId,
-            type: createReceiptDto.type,
-          },
+      const { data, payments } = await this.prismaService.$transaction(
+        async (prisma) => {
+          const receipt = await prisma.receipts.create({
+            data: {
+              cashierId: userId,
+              branchId,
+              contractId: createReceiptDto.contractId,
+              cTin: createReceiptDto.cTin,
+              cName: createReceiptDto.cName,
+              tAmount: createReceiptDto.tAmount * 100,
+              tVat: createReceiptDto.tVat * 100,
+              saleId: createReceiptDto.saleId,
+              type: createReceiptDto.type,
+            },
+          });
+
+          const payments = [];
+          for await (const payment of createReceiptDto.payments) {
+            const newPayment = await prisma.payments.create({
+              data: {
+                receiptId: receipt.id,
+                amount: payment.amount,
+                paymentType: payment.paymentType,
+                cashierId: userId,
+              },
+            });
+            payments.push(newPayment);
+          }
+
+          return { data: receipt, payments };
+        },
+      );
+
+      for await (const payment of payments) {
+        const user = await this.prismaService.users.findUnique({
+          where: { id: userId },
+        });
+        const written = await writeTransactionToSat({
+          amount: payment.amount / 100,
+          type: payment.paymentType,
+          contractid: createReceiptDto.contractId,
+          user: `${user.firstName} ${user.lastName} ${user.middleName}`,
+          userId: user.satId,
         });
 
-        for await (const payment of createReceiptDto.payments) {
-          const newPayment = await prisma.payments.create({
-            data: {
-              receiptId: receipt.id,
-              amount: payment.amount,
-              paymentType: payment.paymentType,
-              cashierId: userId,
-            },
-          });
-
-          const user = await prisma.users.findUnique({
-            where: { id: userId },
-          });
-          const written = await writeTransactionToSat({
-            amount: payment.amount / 100,
-            type: payment.paymentType,
-            contractid: createReceiptDto.contractId,
-            user: `${user.firstName} ${user.lastName} ${user.middleName}`,
-            userId: user.satId,
-          });
-
-          if (!written) {
-            throw new InternalServerErrorException(
-              "SATga yozishda xatolik yuz berdi. To'lovni qaytadan yuborishni unutmang!",
-            );
-          }
-          await prisma.payments.update({
-            where: {
-              id: newPayment.id,
-            },
-            data: {
-              written: true,
-            },
-          });
+        if (!written) {
+          throw new InternalServerErrorException(
+            "SATga yozishda xatolik yuz berdi. To'lovni qaytadan yuborishni unutmang!",
+          );
         }
+        await this.prismaService.payments.update({
+          where: {
+            id: payment.id,
+          },
+          data: {
+            written: true,
+          },
+        });
+      }
 
-        return { data: receipt };
-      });
+      return {
+        data: data,
+      };
     } catch (err) {
       throw new BadRequestException(err.message);
     }
