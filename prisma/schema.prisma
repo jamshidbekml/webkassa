@@ -102,6 +102,7 @@ model Products {
   discountAmount Int @default(0)
   count Int
   isMarked Boolean @default(false)
+  black Boolean @default(false)
 
   branchId String @db.Uuid
   branch Branches @relation(fields: [branchId], references: [id])
