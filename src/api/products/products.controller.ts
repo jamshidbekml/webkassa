@@ -45,9 +45,16 @@ export class ProductsController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('search') search?: string,
+    @Query('status') status?: 'active' | 'inactive',
   ) {
     const { branchId } = req['user'] as { branchId: string };
-    return this.productsService.findAllBlack(+page, +limit, branchId, search);
+    return this.productsService.findAllBlack(
+      +page,
+      +limit,
+      branchId,
+      search,
+      status,
+    );
   }
 
   @CreateProduct('manual')

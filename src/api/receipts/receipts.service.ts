@@ -47,6 +47,20 @@ export class ReceiptsService {
             payments.push(newPayment);
           }
 
+          if (createReceiptDto?.products?.length) {
+            for await (const product of createReceiptDto.products) {
+              await prisma.products.update({
+                where: {
+                  id: product.productId,
+                },
+                data: {
+                  count: {
+                    decrement: product.count,
+                  },
+                },
+              });
+            }
+          }
           return { data: receipt, payments };
         },
       );

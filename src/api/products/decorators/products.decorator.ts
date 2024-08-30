@@ -27,6 +27,12 @@ export function FindAllBlack(routeName?: string) {
     ApiOperation({ summary: 'Get all products' }),
     ApiQuery({ name: 'categoryId', type: String, required: false }),
     ApiQuery({ name: 'search', type: String, required: false }),
+    ApiQuery({
+      name: 'status',
+      type: String,
+      required: false,
+      enum: ['active', 'inactive'],
+    }),
     ApiQuery({ name: 'page', type: Number, required: false, example: 1 }),
     ApiQuery({ name: 'limit', type: Number, required: false, example: 10 }),
     Get(routeName),

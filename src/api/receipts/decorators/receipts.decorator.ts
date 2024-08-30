@@ -27,6 +27,13 @@ export function CreateReceipt(routeName?: string) {
               },
             },
           },
+          products: {
+            type: 'array',
+            properties: {
+              productId: { type: 'string' },
+              count: { type: 'number' },
+            },
+          },
         },
       },
     }),

@@ -5,6 +5,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
 } from 'class-validator';
 
@@ -53,6 +54,11 @@ export class CreateReceiptDto {
   @IsNotEmpty()
   @IsArray()
   payments: { amount: number; paymentType: PAYMENT_TYPE }[];
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsArray()
+  products: { productId: string; count: number }[];
 }
 
 export class CreatePaymentDto {

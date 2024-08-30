@@ -81,6 +81,7 @@ export class ProductsService {
     limit: number,
     branchId: string,
     search?: string,
+    status?: 'active' | 'inactive',
   ) {
     const total = await this.prismaService.products.count({
       where: {
@@ -89,6 +90,11 @@ export class ProductsService {
         ...(search && {
           name: { contains: search, mode: 'insensitive' },
         }),
+        ...(status && status === 'active'
+          ? { count: { gte: 1 } }
+          : {
+              count: 0,
+            }),
       },
     });
 
@@ -105,6 +111,9 @@ export class ProductsService {
       },
       skip: (page - 1) * limit,
       take: limit,
+      orderBy: {
+        count: 'desc',
+      },
     });
 
     return {
