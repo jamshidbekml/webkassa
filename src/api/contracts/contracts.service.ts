@@ -33,6 +33,15 @@ export class ContractsService {
         });
 
         for await (const product of createContractDto.products) {
+          const dbProduct = await prisma.products.findUnique({
+            where: {
+              id: product.productId,
+            },
+          });
+          if (dbProduct.count < product.count)
+            throw new BadRequestException(
+              'Omborda mahsulot mavjud emas yoki qolmagan!',
+            );
           const existProduct = await prisma.contractProducts.findFirst({
             where: {
               contractId: newContract.id,
@@ -68,7 +77,7 @@ export class ContractsService {
             },
             data: {
               count: {
-                decrement: 1,
+                decrement: product.count,
               },
             },
           });
@@ -79,6 +88,11 @@ export class ContractsService {
                 contractProductId: contractProduct.id,
                 label: product.label,
               },
+            });
+
+            await prisma.productMarks.update({
+              where: { label: product.label },
+              data: { sold: true },
             });
           }
         }
@@ -299,28 +313,46 @@ export class ContractsService {
   }
 
   async remove(id: string) {
-    const contract = await this.prismaService.contracts.findUnique({
-      where: { id },
-      include: { receipt: true, products: true },
-    });
-
-    if (contract.receipt)
-      throw new NotFoundException(
-        "Shartnomaga to'lov qilingan, o'chirish mumkin emas",
-      );
-
-    for await (const product of contract.products) {
-      await this.prismaService.products.update({
-        where: { id: product.productId },
-        data: {
-          count: {
-            increment: 1,
-          },
+    try {
+      const contract = await this.prismaService.contracts.findUnique({
+        where: { id },
+        include: {
+          receipt: true,
+          products: { select: { labels: true, productId: true } },
         },
       });
-    }
-    await this.prismaService.contracts.delete({ where: { id } });
 
-    return "Shartnoma muvaffaqqiyatli o'chirildi";
+      if (contract.receipt)
+        throw new NotFoundException(
+          "Shartnomaga to'lov qilingan, o'chirish mumkin emas",
+        );
+
+      await this.prismaService.$transaction(async (prisma) => {
+        for await (const product of contract.products) {
+          await prisma.products.update({
+            where: { id: product.productId },
+            data: {
+              count: {
+                increment: 1,
+              },
+            },
+          });
+
+          for await (const label of product.labels) {
+            await prisma.productMarks.update({
+              where: { label: label.label },
+              data: {
+                sold: false,
+              },
+            });
+          }
+        }
+        await prisma.contracts.delete({ where: { id } });
+      });
+
+      return "Shartnoma muvaffaqqiyatli o'chirildi";
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
   }
 }
