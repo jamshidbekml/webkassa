@@ -164,6 +164,12 @@ export class UsersService {
         createdAt: true,
         updatedAt: true,
         role: true,
+        branch: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
