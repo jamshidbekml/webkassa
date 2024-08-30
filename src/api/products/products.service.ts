@@ -25,7 +25,6 @@ export class ProductsService {
   ) {
     const total = await this.prismaService.products.count({
       where: {
-        black: false,
         branchId,
         ...(search && {
           name: { contains: search, mode: 'insensitive' },
@@ -52,7 +51,6 @@ export class ProductsService {
         },
       },
       where: {
-        black: false,
         branchId,
         ...(search && {
           name: { contains: search, mode: 'insensitive' },
