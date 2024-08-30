@@ -20,7 +20,19 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsOptional()
   @IsNotEmpty()
   @IsString()
-  name?: string;
+  firstName?: string;
+
+  @ApiProperty({ description: `Field to enter user's name` })
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  lastName?: string;
+
+  @ApiProperty({ description: `Field to enter user's name` })
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  middleName?: string;
 
   @IsOptional()
   @IsNotEmpty()
