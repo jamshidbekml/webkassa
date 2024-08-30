@@ -23,6 +23,11 @@ export async function writeTransactionToSat(payload: {
         naqd: payload.type === 'Cash' ? true : false,
         plastik: payload.type === 'Cashless' ? true : false,
       },
+      {
+        headers: {
+          Authorization: `Bearer ${config.get('SAT_TOKEN')}`,
+        },
+      },
     );
 
     if (!success) {
