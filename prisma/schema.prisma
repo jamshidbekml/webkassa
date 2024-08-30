@@ -186,6 +186,7 @@ model Receipts {
 model Payments {
   id String @id @default(uuid()) @db.Uuid
   amount Int
+  written Boolean @default(false)
   paymentType PAYMENT_TYPE
   receiptId String @db.Uuid
   receipt Receipts @relation(fields: [receiptId], references: [id])
