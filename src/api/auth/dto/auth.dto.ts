@@ -27,7 +27,13 @@ export class GetMeDto {
   username: string;
 
   @Expose()
-  name: string;
+  firstName: string;
+
+  @Expose()
+  lastName: string;
+
+  @Expose()
+  middleName: string;
 
   @Expose()
   role: string;
