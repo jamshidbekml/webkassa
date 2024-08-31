@@ -1,4 +1,4 @@
-import { Body, Controller, Query, Req } from '@nestjs/common';
+import { Body, Controller, Param, Query, Req } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { NestedSerialize } from '../interceptors/nested-serialize.interceptor';
@@ -9,7 +9,9 @@ import {
   CreateProduct,
   FindAll,
   FindAllBlack,
+  UpdateProduct,
 } from './decorators/products.decorator';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @ApiBearerAuth()
 @ApiTags('products')
@@ -63,14 +65,14 @@ export class ProductsController {
     return this.productsService.createManual(body, branchId);
   }
 
+  @UpdateProduct(':id')
+  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+    return this.productsService.update(id, updateProductDto);
+  }
+
   // @Get(':id')
   // findOne(@Param('id') id: string) {
   //   return this.productsService.findOne(+id);
-  // }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-  //   return this.productsService.update(+id, updateProductDto);
   // }
 
   // @Delete(':id')

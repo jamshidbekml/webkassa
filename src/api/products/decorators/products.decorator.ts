@@ -1,5 +1,5 @@
-import { applyDecorators, Get, Post } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { applyDecorators, Get, Patch, Post } from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CreateProductDto } from '../dto/create-product.dto';
 
 export function CreateProduct(routeName?: string) {
@@ -7,6 +7,31 @@ export function CreateProduct(routeName?: string) {
     ApiOperation({ summary: 'Create product manually' }),
     ApiBody({ type: CreateProductDto }),
     Post(routeName),
+  );
+}
+
+export function UpdateProduct(routeName?: string) {
+  return applyDecorators(
+    ApiOperation({ summary: 'Update product' }),
+    ApiParam({ name: 'id', type: String }),
+    ApiBody({
+      schema: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          barcode: { type: 'string' },
+          packagecode: { type: 'string' },
+          vat: { type: 'number' },
+          amount: { type: 'number' },
+          discountAmount: { type: 'number' },
+          count: { type: 'number' },
+          branchId: { type: 'string' },
+          categoryId: { type: 'string' },
+          catalogcode: { type: 'string' },
+        },
+      },
+    }),
+    Patch(routeName),
   );
 }
 
