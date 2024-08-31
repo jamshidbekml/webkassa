@@ -6,12 +6,16 @@ import { ProductsResDto } from './dto/products.dto';
 import { Request } from 'express';
 import { CreateProductDto } from './dto/create-product.dto';
 import {
+  AddLabel,
   CreateProduct,
+  DeleteLabel,
   FindAll,
   FindAllBlack,
+  GetOneProduct,
   UpdateProduct,
 } from './decorators/products.decorator';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { CreateLabelDto } from './dto/create-label.dto';
 
 @ApiBearerAuth()
 @ApiTags('products')
@@ -65,15 +69,25 @@ export class ProductsController {
     return this.productsService.createManual(body, branchId);
   }
 
+  @DeleteLabel('label/:id')
+  removeLabel(@Param('id') id: string) {
+    return this.productsService.deleteLabel(id);
+  }
+
+  @AddLabel('label/:id')
+  addLabel(@Param('id') id: string, @Body() { label }: CreateLabelDto) {
+    return this.productsService.addLabel(id, label);
+  }
+
   @UpdateProduct(':id')
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
     return this.productsService.update(id, updateProductDto);
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.productsService.findOne(+id);
-  // }
+  @GetOneProduct(':id')
+  findOne(@Param('id') id: string) {
+    return this.productsService.findOne(id);
+  }
 
   // @Delete(':id')
   // remove(@Param('id') id: string) {

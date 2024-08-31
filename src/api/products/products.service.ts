@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -218,9 +218,51 @@ export class ProductsService {
     }
   }
 
-  // findOne(id: number) {
-  //   return `This action returns a #${id} product`;
-  // }
+  async findOne(id: string) {
+    const product = await this.prismaService.products.findUnique({
+      where: { id },
+      include: {
+        labels: {
+          select: {
+            id: true,
+            label: true,
+            sold: true,
+          },
+        },
+      },
+    });
+
+    if (!product) throw new NotFoundException('Mahsulot topilmadi');
+
+    return product;
+  }
+
+  async deleteLabel(id: string) {
+    const label = await this.prismaService.productMarks.findUnique({
+      where: { id },
+    });
+
+    if (!label) throw new NotFoundException('Markerovka topilmadi');
+
+    await this.prismaService.productMarks.delete({ where: { id } });
+
+    return 'Markerovka muvaffaqqiyatli o`chirildi';
+  }
+
+  async addLabel(productId: string, label: string) {
+    const product = await this.prismaService.products.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) throw new NotFoundException('Mahsulot topilmadi');
+
+    return await this.prismaService.productMarks.create({
+      data: {
+        productId,
+        label,
+      },
+    });
+  }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
     return await this.prismaService.products.update({

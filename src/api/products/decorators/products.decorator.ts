@@ -1,6 +1,7 @@
-import { applyDecorators, Get, Patch, Post } from '@nestjs/common';
+import { applyDecorators, Delete, Get, Patch, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CreateProductDto } from '../dto/create-product.dto';
+import { CreateLabelDto } from '../dto/create-label.dto';
 
 export function CreateProduct(routeName?: string) {
   return applyDecorators(
@@ -32,6 +33,31 @@ export function UpdateProduct(routeName?: string) {
       },
     }),
     Patch(routeName),
+  );
+}
+
+export function GetOneProduct(routeName?: string) {
+  return applyDecorators(
+    ApiOperation({ summary: 'Get one product' }),
+    ApiParam({ name: 'id', type: String }),
+    Get(routeName),
+  );
+}
+
+export function DeleteLabel(routeName?: string) {
+  return applyDecorators(
+    ApiOperation({ summary: 'Delete label' }),
+    ApiParam({ name: 'id', type: String }),
+    Delete(routeName),
+  );
+}
+
+export function AddLabel(routeName?: string) {
+  return applyDecorators(
+    ApiOperation({ summary: 'Add label' }),
+    ApiParam({ name: 'id', type: String }),
+    ApiBody({ type: CreateLabelDto }),
+    Post(routeName),
   );
 }
 
