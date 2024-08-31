@@ -37,8 +37,9 @@ export async function writeTransactionToSat(payload: {
     if (!success) {
       throw new BadRequestException('SAT transaction error');
     }
+
     return success;
   } catch (err) {
-    return false;
+    throw new BadRequestException(err.message);
   }
 }

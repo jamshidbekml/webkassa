@@ -77,6 +77,8 @@ export class ReceiptsService {
           userId: user.satId,
         });
 
+        console.log(written);
+
         if (!written) {
           throw new InternalServerErrorException(
             "SATga yozishda xatolik yuz berdi. To'lovni qaytadan yuborishni unutmang!",
