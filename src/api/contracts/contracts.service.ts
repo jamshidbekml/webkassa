@@ -183,14 +183,16 @@ export class ContractsService {
     const { grafik, tulov } = await getContractGraphFromSat(contractId);
 
     return {
-      data: grafik.map((e) => ({
-        id: e.nomer,
-        date: e.sana,
-        amount: e.summa,
-        debt: e.qoldiq,
-        payed: e.tulov,
-        closed: e.yopildi,
-      })),
+      data: Array.isArray(grafik)
+        ? grafik.map((e) => ({
+            id: e.nomer,
+            date: e.sana,
+            amount: e.summa,
+            debt: e.qoldiq,
+            payed: e.tulov,
+            closed: e.yopildi,
+          }))
+        : [],
       payments: tulov,
     };
   }
