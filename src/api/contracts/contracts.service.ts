@@ -57,6 +57,8 @@ export class ContractsService {
               data: {
                 count: existProduct.count + product.count,
                 amount: existProduct.amount + product.amount,
+                discountAmount:
+                  existProduct.discountAmount + product.discountAmount,
               },
             });
           } else {
@@ -299,9 +301,15 @@ export class ContractsService {
           name: product.product.name,
           packageCode: product.product.packagecode,
           vat: Number(product.product.vat) / 100,
-          price: Math.ceil(product.amount * 100) / product.count,
+          price:
+            product.count > 1
+              ? Math.ceil((product.amount * 100) / product.count)
+              : product.amount * 100,
           amount: product.count,
-          discountAmount: 0,
+          discountAmount:
+            product.count > 1
+              ? Math.ceil((product.discountAmount * 100) / product.count)
+              : product.discountAmount * 100,
           labels: product.labels.map((e) => e.label),
           units: 'шт',
           isDecimalUnits: false,
