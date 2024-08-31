@@ -246,6 +246,16 @@ export class ProductsService {
 
     await this.prismaService.productMarks.delete({ where: { id } });
 
+    if (!label.sold)
+      await this.prismaService.products.update({
+        where: { id: label.productId },
+        data: {
+          count: {
+            decrement: 1,
+          },
+        },
+      });
+
     return 'Markerovka muvaffaqqiyatli o`chirildi';
   }
 
@@ -256,12 +266,23 @@ export class ProductsService {
 
     if (!product) throw new NotFoundException('Mahsulot topilmadi');
 
-    return await this.prismaService.productMarks.create({
+    const newLabel = await this.prismaService.productMarks.create({
       data: {
         productId,
         label,
       },
     });
+
+    await this.prismaService.products.update({
+      where: { id: productId },
+      data: {
+        count: {
+          increment: 1,
+        },
+      },
+    });
+
+    return newLabel;
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
