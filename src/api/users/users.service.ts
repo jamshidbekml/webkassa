@@ -78,7 +78,7 @@ export class UsersService {
     };
   }
 
-  async update(id: string, data: UpdateUserDto, role: ROLE) {
+  async update(id: string, data: UpdateUserDto, role?: ROLE) {
     if (!isUUID(id))
       throw new BadRequestException('Foydalanuvchi id`si uuid tipida emas!');
     const isExist = await this.prismaService.users.findUnique({
