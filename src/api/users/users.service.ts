@@ -8,6 +8,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import * as argon2 from 'argon2';
 import { PrismaService } from '../prisma/prisma.service';
 import { isUUID } from '../shared/utils/uuid-checker';
+import { ROLE } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -77,7 +78,7 @@ export class UsersService {
     };
   }
 
-  async update(id: string, data: UpdateUserDto) {
+  async update(id: string, data: UpdateUserDto, role: ROLE) {
     if (!isUUID(id))
       throw new BadRequestException('Foydalanuvchi id`si uuid tipida emas!');
     const isExist = await this.prismaService.users.findUnique({
@@ -89,7 +90,7 @@ export class UsersService {
       data.password = await argon2.hash(data.password);
     }
 
-    if (data?.role && isExist.role !== 'superadmin')
+    if (data?.role && role !== 'superadmin')
       throw new BadRequestException('You are not allowed to update role');
 
     const user = await this.prismaService.users.update({

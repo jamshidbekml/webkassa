@@ -6,6 +6,7 @@ import {
   Param,
   Get,
   Query,
+  Req,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -17,6 +18,8 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { Request } from 'express';
+import { ROLE } from '@prisma/client';
 
 @ApiBearerAuth()
 @ApiTags('users')
@@ -50,8 +53,13 @@ export class UsersController {
   // }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  update(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    const { role } = req['user'] as { role: ROLE };
+    return this.usersService.update(id, updateUserDto, role);
   }
 
   // @Delete(':id')
