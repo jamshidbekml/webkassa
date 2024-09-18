@@ -36,8 +36,10 @@ export class ContractsController {
   }
 
   @GetContract(':id')
-  findOne(@Param('id') id: string) {
-    return this.contractsService.findOne(id);
+  findOne(@Req() req: Request, @Param('id') id: string) {
+    const { sub } = req['user'] as { sub: string };
+
+    return this.contractsService.findOne(id, sub);
   }
 
   @GetContractProducts('products/:contractId')

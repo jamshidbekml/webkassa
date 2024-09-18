@@ -42,36 +42,16 @@ export class ContractsService {
             throw new BadRequestException(
               'Omborda mahsulot mavjud emas yoki qolmagan!',
             );
-          const existProduct = await prisma.contractProducts.findFirst({
-            where: {
+
+          const contractProduct = await prisma.contractProducts.create({
+            data: {
               contractId: newContract.id,
               productId: product.productId,
+              amount: product.amount,
+              discountAmount: product.discountAmount,
+              count: 1,
             },
           });
-          let contractProduct;
-          if (existProduct) {
-            contractProduct = await prisma.contractProducts.update({
-              where: {
-                id: existProduct.id,
-              },
-              data: {
-                count: existProduct.count + product.count,
-                amount: existProduct.amount + product.amount,
-                discountAmount:
-                  existProduct.discountAmount + product.discountAmount,
-              },
-            });
-          } else {
-            contractProduct = await prisma.contractProducts.create({
-              data: {
-                contractId: newContract.id,
-                productId: product.productId,
-                amount: product.amount,
-                discountAmount: product.discountAmount,
-                count: product.count,
-              },
-            });
-          }
 
           await prisma.products.update({
             where: {
@@ -79,12 +59,23 @@ export class ContractsService {
             },
             data: {
               count: {
-                decrement: product.count,
+                decrement: 1,
               },
             },
           });
 
           if (product?.label) {
+            const productMark = await prisma.productMarks.findUnique({
+              where: {
+                label: product.label,
+              },
+            });
+
+            if (!productMark || productMark.sold)
+              throw new BadRequestException(
+                'Bunday MXIK mavjud emas yoki sotilgan!',
+              );
+
             await prisma.contractProductLabels.create({
               data: {
                 contractProductId: contractProduct.id,
@@ -253,7 +244,7 @@ export class ContractsService {
     return { data: contracts, pageSize: limit, total, current: page };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, userId: string) {
     const contract = await this.prismaService.contracts.findUnique({
       where: { id },
       include: {
@@ -278,44 +269,46 @@ export class ContractsService {
         receipt: {
           include: { payments: true },
         },
+        branch: {
+          select: {
+            name: true,
+            companyAddress: true,
+            inn: true,
+            token: true,
+          },
+        },
       },
     });
 
     if (!contract) throw new NotFoundException('Shartnoma topilmadi');
 
+    const user = await this.prismaService.users.findUnique({
+      where: { id: userId },
+    });
+
     return {
       data: {
         id: contract.id,
-        clientFullName: contract.clientFullName,
-        contractId: contract.contractId,
-        phone: contract.phone,
         secondPhone: contract.secondPhone,
         passportSeries: contract.passportSeries,
         pinfl: contract.pinfl,
         createdAt: contract.createdAt,
         updatedAt: contract.updatedAt,
-        products: contract.products.map((product) => ({
+        staffName: user.firstName + ' ' + user.lastName,
+        phoneNumber: contract.phone,
+        paycheckNumber: contract.contractId,
+        clientName: contract.clientFullName,
+        items: contract.products.map((product) => ({
           id: product.product.id,
-          barcode: product.product.barcode,
-          psid: product.product.catalogcode,
+          barcode: product.product.catalogcode,
           name: product.product.name,
           packageCode: product.product.packagecode,
-          vat: Number(product.product.vat) / 100,
-          price:
-            product.count > 1
-              ? Math.ceil((product.amount * 100) / product.count)
-              : product.amount * 100,
-          amount: product.count,
-          discountAmount:
-            product.count > 1
-              ? Math.ceil((product.discountAmount * 100) / product.count)
-              : product.discountAmount * 100,
-          labels: product.labels.map((e) => e.label),
-          units: 'шт',
-          isDecimalUnits: false,
-          unitCode: null,
-          commissionPINFL: null,
-          commissionTIN: null,
+          vatPercent: Number(product.product.vat),
+          price: product.amount * 100,
+          amount: product.count * 1000,
+          other: product.discountAmount * 100,
+          classCode: product.labels[0],
+          discount: 0,
         })),
         receipt: contract.receipt,
       },
@@ -327,14 +320,14 @@ export class ContractsService {
       const contract = await this.prismaService.contracts.findUnique({
         where: { id },
         include: {
-          receipt: true,
+          receipt: { select: { type: true } },
           products: { select: { labels: true, productId: true } },
         },
       });
 
       if (contract.receipt)
         throw new NotFoundException(
-          "Shartnomaga to'lov qilingan, o'chirish mumkin emas",
+          "Shartnomaga to'lov qilingan, texniklar bilan bog'laning!",
         );
 
       await this.prismaService.$transaction(async (prisma) => {

@@ -8,23 +8,21 @@ export class ProductsResDto {
   name: string;
 
   @Expose()
+  @Transform(({ obj }) => obj.catalogcode)
   barcode: string;
 
   @Expose()
   packagecode: string;
 
   @Expose()
-  @Transform(({ obj }) => +obj.vat / 100)
-  vatRate: number;
+  @Transform(({ obj }) => +obj.vat)
+  vatPercent: number;
 
   @Expose()
   discountAmount: number;
 
   @Expose()
   amount: number;
-
-  @Expose()
-  catalogcode: number;
 
   @Expose()
   count: number;
@@ -39,5 +37,6 @@ export class ProductsResDto {
   updatedAt: string;
 
   @Expose()
-  labels: any[];
+  @Transform(({ obj }) => obj.labels)
+  classCode: any[];
 }

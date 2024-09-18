@@ -8,6 +8,8 @@ const filiallar = [
     inn: configService.get('BRANCH_INN'),
     password: configService.get('BRANCH_PASSWORD'),
     name: '"QUVASOY MARKET CITY" MCHJ',
+    token: 'DXJFX32CN1296678504F2',
+    companyAddress: `Fargona viloyati,Quvasoy sh.,Muyan MFY, Boshkoprik kochasi`,
   },
 ];
 
