@@ -15,7 +15,6 @@ import { DidoxModule } from './didox/didox.module';
 import { ContractsModule } from './contracts/contracts.module';
 import { ReceiptsModule } from './receipts/receipts.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { TerminalsModule } from './terminals/terminals.module';
 import { ExcelModule } from './excel/excel.module';
 
 @Module({
@@ -32,7 +31,6 @@ import { ExcelModule } from './excel/excel.module';
     DidoxModule,
     ContractsModule,
     ReceiptsModule,
-    TerminalsModule,
     ExcelModule,
   ],
   providers: [
