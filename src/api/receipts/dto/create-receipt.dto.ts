@@ -76,12 +76,7 @@ export class CreateReceiptDto {
   @IsString()
   contractId: string;
 
-  @IsDefined()
-  @IsNotEmpty()
-  @IsString()
-  createdAt?: Date;
-
-  @IsDefined()
+  @IsOptional()
   @IsNotEmpty()
   @IsArray()
   payments?: { amount: number; receivedCard: number; receivedCash: number };
