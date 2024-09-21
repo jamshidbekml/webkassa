@@ -47,7 +47,14 @@ export class GetMeDto {
   @Expose()
   @Transform(
     ({ value }) => {
-      return value ? { id: value.id, name: value.name } : null;
+      return value
+        ? {
+            id: value.id,
+            name: value.name,
+            address: value.companyAddress,
+            companyInn: value.inn,
+          }
+        : null;
     },
     {
       toClassOnly: true,
