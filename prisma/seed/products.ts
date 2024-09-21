@@ -28,6 +28,7 @@ export async function products() {
     }));
 
     const branches = await prismaClient.branches.findMany();
+
     for await (const branch of branches) {
       const caytegory = await prismaClient.categories.upsert({
         where: {
