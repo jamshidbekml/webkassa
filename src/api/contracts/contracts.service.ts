@@ -43,13 +43,19 @@ export class ContractsService {
               'Omborda mahsulot mavjud emas yoki qolmagan!',
             );
 
-          const contractProduct = await prisma.contractProducts.create({
+          await prisma.contractProducts.create({
             data: {
               contractId: newContract.id,
               productId: product.productId,
               amount: product.amount,
-              discountAmount: product.discountAmount,
+              other: product.discountAmount,
               count: 1,
+              barcode: dbProduct.catalogcode,
+              name: dbProduct.name,
+              vatPercent: Number(dbProduct.vat),
+              packageCode: dbProduct.packagecode,
+              vat: product.vat,
+              ...(product?.label ? { classCode: product?.label } : {}),
             },
           });
 
@@ -75,13 +81,6 @@ export class ContractsService {
               throw new BadRequestException(
                 'Bunday MXIK mavjud emas yoki sotilgan!',
               );
-
-            await prisma.contractProductLabels.create({
-              data: {
-                contractProductId: contractProduct.id,
-                label: product.label,
-              },
-            });
 
             await prisma.productMarks.update({
               where: { label: product.label },
@@ -125,7 +124,11 @@ export class ContractsService {
         name: foundProduct.name,
         isMarked: foundProduct.isMarked,
         amount: product.summa,
-        discountAmount: 0,
+        barcode: foundProduct.catalogcode,
+        vatPercent: Number(foundProduct.vat),
+        packageCode: foundProduct.packagecode,
+        discount: 0,
+        other: 0,
         count: 1,
       });
     }
@@ -154,7 +157,11 @@ export class ContractsService {
         name: foundProduct.name,
         isMarked: foundProduct.isMarked,
         amount: product.summa,
-        discountAmount: product.summa,
+        discount: 0,
+        other: product.summa,
+        barcode: foundProduct.catalogcode,
+        vatPercent: Number(foundProduct.vat),
+        packageCode: foundProduct.packagecode,
         count: 1,
       });
     }
@@ -250,20 +257,17 @@ export class ContractsService {
       include: {
         products: {
           select: {
-            product: {
-              select: {
-                id: true,
-                barcode: true,
-                catalogcode: true,
-                name: true,
-                packagecode: true,
-                vat: true,
-              },
-            },
+            id: true,
             amount: true,
             count: true,
-            discountAmount: true,
-            labels: { select: { label: true } },
+            discount: true,
+            classCode: true,
+            barcode: true,
+            other: true,
+            packageCode: true,
+            vatPercent: true,
+            vat: true,
+            name: true,
           },
         },
         receipt: {
@@ -299,15 +303,15 @@ export class ContractsService {
         paycheckNumber: contract.contractId,
         clientName: contract.clientFullName,
         items: contract.products.map((product) => ({
-          id: product.product.id,
-          barcode: product.product.catalogcode,
-          name: product.product.name,
-          packageCode: product.product.packagecode,
-          vatPercent: Number(product.product.vat),
+          id: product.id,
+          barcode: product.barcode,
+          name: product.name,
+          packageCode: product.packageCode,
+          vatPercent: Number(product.vatPercent),
           price: product.amount * 100,
           amount: product.count * 1000,
-          other: product.discountAmount * 100,
-          classCode: product.labels[0],
+          other: product.other * 100,
+          classCode: product.classCode,
           discount: 0,
         })),
         receipt: contract.receipt,
@@ -321,7 +325,7 @@ export class ContractsService {
         where: { id },
         include: {
           receipt: { select: { type: true } },
-          products: { select: { labels: true, productId: true } },
+          products: { select: { productId: true, classCode: true } },
         },
       });
 
@@ -341,9 +345,9 @@ export class ContractsService {
             },
           });
 
-          for await (const label of product.labels) {
+          if (product.classCode) {
             await prisma.productMarks.update({
-              where: { label: label.label },
+              where: { label: product.classCode },
               data: {
                 sold: false,
               },

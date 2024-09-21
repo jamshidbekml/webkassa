@@ -1,12 +1,10 @@
-import { BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PAYMENT_TYPE } from '@prisma/client';
 import axios from 'axios';
 
 export async function writeTransactionToSat(payload: {
   contractid: string;
-  type: PAYMENT_TYPE;
-  amount: number;
+  receivedCard: number;
+  receivedCash: number;
   userId: number;
   user: string;
 }) {
@@ -23,9 +21,8 @@ export async function writeTransactionToSat(payload: {
       {
         branch: payload.contractid.split('_')[0].toLowerCase(),
         shraqam: payload.contractid,
-        amount: payload.amount,
-        naqd: payload.type === 'Cash' ? true : false,
-        plastik: payload.type === 'Cashless' ? true : false,
+        naqd: payload.receivedCash,
+        plastik: payload.receivedCard,
       },
       {
         headers: {
@@ -35,11 +32,12 @@ export async function writeTransactionToSat(payload: {
     );
 
     if (!success) {
-      throw new BadRequestException('SAT transaction error');
+      return false;
     }
 
-    return success;
+    return true;
   } catch (err) {
-    throw new BadRequestException(err.message);
+    // throw new BadRequestException(err.message);
+    return false;
   }
 }

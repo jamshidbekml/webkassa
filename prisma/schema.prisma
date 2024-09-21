@@ -139,38 +139,44 @@ model Contracts {
 }
 
 model ContractProducts {
-  id             String                  @id @default(uuid()) @db.Uuid
-  productId      String                  @db.Uuid
-  count          Int
-  amount         Int
-  discountAmount Int
-  product        Products                @relation(fields: [productId], references: [id])
-  contractId     String                  @db.Uuid
-  contract       Contracts               @relation(fields: [contractId], references: [id], onDelete: Cascade)
-  labels         ContractProductLabels[]
-}
-
-model ContractProductLabels {
-  id                String           @id @default(uuid()) @db.Uuid
-  label             String           @unique
-  contractProductId String           @db.Uuid
-  contractProduct   ContractProducts @relation(fields: [contractProductId], references: [id], onDelete: Cascade)
+  id          String    @id @default(uuid()) @db.Uuid
+  contractId  String    @db.Uuid
+  productId   String    @db.Uuid
+  count       Int
+  amount      Int
+  discount    Int?
+  other       Int
+  barcode     String
+  vatPercent  Int
+  vat         Int
+  name        String
+  packageCode String
+  classCode   String?
+  product     Products  @relation(fields: [productId], references: [id], onDelete: NoAction)
+  contract    Contracts @relation(fields: [contractId], references: [id], onDelete: Cascade)
 }
 
 model Receipts {
-  id         String       @id @default(uuid()) @db.Uuid
-  terminalId String
-  receiptSeq String
-  fiscalSign String
-  dateTime   String
-  type       RECEIPT_TYPE
-  cashierId  String       @db.Uuid
-  cashier    Users        @relation(fields: [cashierId], references: [id])
-  contractId String       @db.Uuid
-  contract   Contracts    @relation(fields: [contractId], references: [id])
-  branchId   String       @db.Uuid
-  branch     Branches     @relation(fields: [branchId], references: [id])
-  createdAt  DateTime     @default(now())
+  id             String       @id @default(uuid()) @db.Uuid
+  terminalId     String
+  receiptSeq     String
+  fiscalSign     String
+  dateTime       String
+  qrCodeURL      String
+  companyName    String
+  companyAddress String
+  companyINN     String
+  staffName      String
+  phoneNumber    String
+  clientName     String
+  type           RECEIPT_TYPE
+  cashierId      String       @db.Uuid
+  cashier        Users        @relation(fields: [cashierId], references: [id], onDelete: NoAction)
+  contractId     String       @db.Uuid
+  contract       Contracts    @relation(fields: [contractId], references: [id], onDelete: NoAction)
+  branchId       String       @db.Uuid
+  branch         Branches     @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
 
   payments Payments[]
 
@@ -178,15 +184,16 @@ model Receipts {
 }
 
 model Payments {
-  id          String       @id @default(uuid()) @db.Uuid
-  amount      Int
-  written     Boolean      @default(false)
-  paymentType PAYMENT_TYPE
-  receiptId   String       @db.Uuid
-  receipt     Receipts     @relation(fields: [receiptId], references: [id])
-  cashierId   String       @db.Uuid
-  cashier     Users        @relation(fields: [cashierId], references: [id])
-  createdAt   DateTime     @default(now())
+  id           String   @id @default(uuid()) @db.Uuid
+  amount       Int
+  written      Boolean  @default(false)
+  receivedCash Int
+  receivedCard Int
+  receiptId    String   @db.Uuid
+  receipt      Receipts @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  cashierId    String   @db.Uuid
+  cashier      Users    @relation(fields: [cashierId], references: [id], onDelete: NoAction)
+  createdAt    DateTime @default(now())
 
   @@map("payments")
 }

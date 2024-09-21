@@ -9,7 +9,7 @@ import {
   GetAllReceipts,
   GetReceipt,
 } from './decorators/receipts.decorator';
-import { PAYMENT_TYPE, RECEIPT_TYPE } from '@prisma/client';
+import { RECEIPT_TYPE } from '@prisma/client';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { GetReceiptsDto } from './dto/receips.dto';
 import { NestedSerialize } from '../interceptors/nested-serialize.interceptor';
@@ -50,10 +50,10 @@ export class ReceiptsController {
     );
   }
 
-  @AddPayment('add/:saleId')
+  @AddPayment('add/:id')
   addPayment(
     @Req() req: Request,
-    @Param('saleId') saleId: string,
+    @Param('id') saleId: string,
     @Body() body: CreatePaymentDto,
   ) {
     const { sub } = req['user'] as { sub: string };
@@ -63,7 +63,6 @@ export class ReceiptsController {
   @GetAllPayments('payments')
   getAllPayments(
     @Req() req: Request,
-    @Query('type') type: PAYMENT_TYPE,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('search') search?: string,
@@ -74,7 +73,6 @@ export class ReceiptsController {
     const { branchId } = req['user'] as { branchId: string };
     return this.receiptsService.findPayments(
       branchId,
-      type,
       +page,
       +limit,
       search,

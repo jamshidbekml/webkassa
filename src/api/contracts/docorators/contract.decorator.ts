@@ -20,10 +20,16 @@ export function CreateContract(routeName?: string) {
               type: 'object',
               properties: {
                 productId: { type: 'string' },
-                count: { type: 'number' },
-                amount: { type: 'number' },
-                discountAmount: { type: 'number' },
+                amount: { type: 'number', description: 'mahsulot narxi' },
+                discountAmount: {
+                  type: 'number',
+                  description: 'chegirma narxi',
+                },
                 label: { type: 'string' },
+                vat: {
+                  type: 'number',
+                  description: 'mahsulotni narxining qqs qiymati',
+                },
               },
             },
           },

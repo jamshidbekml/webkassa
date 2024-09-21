@@ -46,5 +46,6 @@ export class CreateContractDto {
     amount: number;
     discountAmount: number;
     label?: string;
+    vat: number;
   }[];
 }

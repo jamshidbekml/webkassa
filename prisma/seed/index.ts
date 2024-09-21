@@ -6,7 +6,7 @@ import { products } from './products';
 
 export const admin = {
   username: 'test',
-  password: 'test',
+  password: '',
 };
 
 async function seed() {

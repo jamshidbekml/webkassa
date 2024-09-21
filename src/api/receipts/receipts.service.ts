@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { CreatePaymentDto, CreateReceiptDto } from './dto/create-receipt.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { PAYMENT_TYPE, RECEIPT_TYPE } from '@prisma/client';
+import { RECEIPT_TYPE, Payments } from '@prisma/client';
 import { writeTransactionToSat } from '../shared/utils/write-payment-to-sat';
 
 @Injectable()
@@ -18,33 +18,39 @@ export class ReceiptsService {
     branchId: string,
   ) {
     try {
-      const { data, payments } = await this.prismaService.$transaction(
+      const { data, payment } = await this.prismaService.$transaction(
         async (prisma) => {
           const receipt = await prisma.receipts.create({
             data: {
               cashierId: userId,
               branchId,
               contractId: createReceiptDto.contractId,
-              cTin: createReceiptDto.cTin,
-              cName: createReceiptDto.cName,
-              tAmount: createReceiptDto.tAmount * 100,
-              tVat: createReceiptDto.tVat * 100,
-              saleId: createReceiptDto.saleId,
               type: createReceiptDto.type,
+              receiptSeq: createReceiptDto.receiptSeq,
+              dateTime: createReceiptDto.dateTime,
+              fiscalSign: createReceiptDto.fiscalSign,
+              terminalId: createReceiptDto.terminalId,
+              qrCodeURL: createReceiptDto.qrCodeURL,
+              companyName: createReceiptDto.companyName,
+              companyAddress: createReceiptDto.companyAddress,
+              companyINN: createReceiptDto.companyINN,
+              phoneNumber: createReceiptDto.phoneNumber,
+              clientName: createReceiptDto.clientName,
+              staffName: createReceiptDto.staffName,
             },
           });
 
-          const payments = [];
-          for await (const payment of createReceiptDto.payments) {
-            const newPayment = await prisma.payments.create({
+          let payment: Payments;
+          if (createReceiptDto?.payments) {
+            payment = await prisma.payments.create({
               data: {
                 receiptId: receipt.id,
-                amount: payment.amount,
-                paymentType: payment.paymentType,
+                amount: createReceiptDto?.payments.amount,
                 cashierId: userId,
+                receivedCard: createReceiptDto?.payments.receivedCard,
+                receivedCash: createReceiptDto?.payments.receivedCash,
               },
             });
-            payments.push(newPayment);
           }
 
           if (createReceiptDto?.products?.length) {
@@ -61,23 +67,21 @@ export class ReceiptsService {
               });
             }
           }
-          return { data: receipt, payments };
+          return { data: receipt, payment };
         },
       );
 
-      for await (const payment of payments) {
+      if (payment) {
         const user = await this.prismaService.users.findUnique({
           where: { id: userId },
         });
         const written = await writeTransactionToSat({
-          amount: payment.amount / 100,
-          type: payment.paymentType,
+          receivedCash: payment.receivedCash,
+          receivedCard: payment.receivedCard,
           contractid: createReceiptDto.contractId,
           user: `${user.firstName} ${user.lastName} ${user.middleName}`,
           userId: user.satId,
         });
-
-        console.log(written);
 
         if (!written) {
           throw new InternalServerErrorException(
@@ -150,9 +154,6 @@ export class ReceiptsService {
                     ],
                   },
                 },
-                {
-                  saleId: { contains: search, mode: 'insensitive' },
-                },
               ],
             }
           : {
@@ -165,23 +166,20 @@ export class ReceiptsService {
       select: {
         contract: {
           select: {
-            products: {
-              select: {
-                product: true,
-                labels: { select: { label: true } },
-                amount: true,
-                count: true,
-                discountAmount: true,
-              },
-            },
             clientFullName: true,
             phone: true,
             contractId: true,
             secondPhone: true,
           },
         },
-        payments: { select: { paymentType: true, amount: true } },
-        saleId: true,
+        payments: {
+          select: { amount: true, receivedCash: true, receivedCard: true },
+        },
+        terminalId: true,
+        receiptSeq: true,
+        fiscalSign: true,
+        dateTime: true,
+        qrCodeURL: true,
       },
       skip: (page - 1) * limit,
       take: limit,
@@ -244,7 +242,7 @@ export class ReceiptsService {
   async createPayment(userId: string, saleId: string, body: CreatePaymentDto) {
     try {
       const receipt = await this.prismaService.receipts.findUnique({
-        where: { saleId },
+        where: { id: saleId },
         include: {
           contract: {
             select: {
@@ -259,7 +257,8 @@ export class ReceiptsService {
       const payment = await this.prismaService.payments.create({
         data: {
           amount: +body.amount * 100,
-          paymentType: body.type,
+          receivedCard: +body.receivedCard * 100,
+          receivedCash: +body.receivedCash * 100,
           cashierId: userId,
           receiptId: receipt.id,
         },
@@ -269,8 +268,8 @@ export class ReceiptsService {
         where: { id: userId },
       });
       const written = await writeTransactionToSat({
-        amount: body.amount,
-        type: body.type,
+        receivedCard: +body.receivedCard * 100,
+        receivedCash: +body.receivedCash * 100,
         contractid: receipt.contract.contractId,
         user: `${user.firstName} ${user.lastName} ${user.middleName}`,
         userId: user.satId,
@@ -298,7 +297,6 @@ export class ReceiptsService {
 
   async findPayments(
     branchId: string,
-    type: PAYMENT_TYPE,
     page: number,
     limit: number,
     search?: string,
@@ -318,7 +316,6 @@ export class ReceiptsService {
         receipt: {
           branchId,
         },
-        paymentType: type,
         ...(search
           ? {
               OR: [
@@ -347,11 +344,6 @@ export class ReceiptsService {
                         },
                       ],
                     },
-                  },
-                },
-                {
-                  receipt: {
-                    saleId: { contains: search, mode: 'insensitive' },
                   },
                 },
               ],
@@ -373,7 +365,6 @@ export class ReceiptsService {
         receipt: {
           branchId,
         },
-        paymentType: type,
         ...(search
           ? {
               OR: [
@@ -402,11 +393,6 @@ export class ReceiptsService {
                         },
                       ],
                     },
-                  },
-                },
-                {
-                  receipt: {
-                    saleId: { contains: search, mode: 'insensitive' },
                   },
                 },
               ],
