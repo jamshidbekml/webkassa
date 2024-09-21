@@ -316,6 +316,7 @@ export class ContractsService {
           price: product.amount * 100,
           amount: product.count * 1000,
           other: product.other * 100,
+          vat: product.vat * 100,
           classCode: product.classCode,
           discount: 0,
         })),
