@@ -119,12 +119,13 @@ export class DidoxService {
             const newProduct = await prisma.products.create({
               data: {
                 name: product.name,
-                catalogcode: product.barcode,
+                barcode: product.barcode,
                 packagecode: product.packagecode,
                 count: +product.count,
                 vat: +product.vatrate,
                 categoryId: category.id,
                 branchId: branch.id,
+                catalogcode: product.catalogcode,
               },
             });
 

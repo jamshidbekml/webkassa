@@ -191,6 +191,7 @@ export class ProductsService {
         categoryId: category.id,
         branchId: branchId,
         catalogcode: createProductDto.catalogcode,
+        barcode: createProductDto.barcode,
       });
 
       if (createProductDto?.lables) {

@@ -79,13 +79,22 @@ export class CreateProductDto {
   categoryId: string;
 
   @ApiProperty({
-    description: `Field to enter product catalogcode`,
+    description: `Field to enter product ИКПУ`,
     required: true,
   })
   @IsDefined()
   @IsNotEmpty()
   @IsString()
   catalogcode: string;
+
+  @ApiProperty({
+    description: `Field to enter product barcode`,
+    required: false,
+  })
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  barcode: string;
 
   @ApiProperty({
     description: `Field to enter product lables`,

@@ -11,11 +11,6 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
   @IsOptional()
   @IsNotEmpty()
   @IsString()
-  barcode?: string;
-
-  @IsOptional()
-  @IsNotEmpty()
-  @IsString()
   packagecode?: string;
 
   @IsOptional()
