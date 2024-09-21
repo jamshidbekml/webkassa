@@ -87,7 +87,6 @@ model Categories {
 model Products {
   id             String  @id @default(uuid()) @db.Uuid
   name           String
-  barcode        String
   packagecode    String
   catalogcode    String
   vat            Int

@@ -185,7 +185,6 @@ export class ProductsService {
     } else {
       const newProduct = await this.create({
         name: createProductDto.name,
-        barcode: createProductDto.barcode,
         packagecode: createProductDto.packagecode,
         count: +createProductDto.count,
         vat: createProductDto.vat,

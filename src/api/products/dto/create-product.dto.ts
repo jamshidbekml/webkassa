@@ -16,15 +16,6 @@ export class CreateProductDto {
   name: string;
 
   @ApiProperty({
-    description: `Field to enter product barcode`,
-    required: true,
-  })
-  @IsDefined()
-  @IsNotEmpty()
-  @IsString()
-  barcode: string;
-
-  @ApiProperty({
     description: `Field to enter product packagecode`,
     required: true,
   })
