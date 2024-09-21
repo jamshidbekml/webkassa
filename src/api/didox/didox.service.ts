@@ -63,7 +63,7 @@ export class DidoxService {
         },
       } = await this.findOneDocument(inn, docId);
 
-      if (status !== 3)
+      if (status !== 3 && status !== 40)
         throw new BadRequestException('Faktura tasdiqlanmagan!');
       if (doctype !== '002')
         throw new BadRequestException('Bu fakturdan kirim qila olmaysiz!');
