@@ -27,8 +27,6 @@ export async function getContractProductsFromSat(contractId: string) {
       },
     );
 
-    console.log(data);
-
     return data.data;
   } catch (err) {
     console.log(err);

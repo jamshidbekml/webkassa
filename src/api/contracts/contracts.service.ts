@@ -112,6 +112,8 @@ export class ContractsService {
         },
       });
 
+      console.log(foundProduct);
+
       if (!foundProduct || foundProduct.name !== product.name)
         throw new BadRequestException(
           `Satdan kelgan mahsulot kassa mahsuloti bilan mos kelmayabdi! Mahsulot: ${product.name}`,
