@@ -23,7 +23,6 @@ export async function products() {
       catalogcode: e.МИХК.slice(0, 17),
       packagecode: e.Упаковка.slice(-7),
       count: 50,
-      barcode: '',
       vat: 12,
     }));
 
