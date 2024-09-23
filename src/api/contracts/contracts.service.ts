@@ -58,11 +58,10 @@ export class ContractsService {
               vat:
                 product.amount - product.discountAmount === 0
                   ? 0
-                  : (Math.round(
-                      (product.amount - product.discountAmount) * 100,
-                    ) /
-                      (100 + Number(dbProduct.vat), 4)) *
-                    100,
+                  : +(
+                      ((product.amount - product.discountAmount) * 100) /
+                      (100 + Number(dbProduct.vat))
+                    ).toFixed(2) * 100,
               label: product?.label,
             },
           });
