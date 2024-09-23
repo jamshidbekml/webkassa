@@ -59,7 +59,7 @@ export class ContractsService {
                 product.amount - product.discountAmount === 0
                   ? 0
                   : +(
-                      ((product.amount - product.discountAmount) * 100) /
+                      ((product.amount - product.discountAmount) * 12) /
                       (100 + Number(dbProduct.vat))
                     ).toFixed(2) * 100,
               label: product?.label,
