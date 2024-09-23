@@ -26,10 +26,6 @@ export function CreateContract(routeName?: string) {
                   description: 'chegirma narxi',
                 },
                 label: { type: 'string' },
-                vat: {
-                  type: 'number',
-                  description: 'mahsulotni narxining qqs qiymati',
-                },
               },
             },
           },

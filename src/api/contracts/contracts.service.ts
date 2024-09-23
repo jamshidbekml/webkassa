@@ -47,15 +47,22 @@ export class ContractsService {
             data: {
               contractId: newContract.id,
               productId: product.productId,
-              amount: product.amount,
-              other: product.discountAmount,
+              amount: product.amount * 100,
+              other: product.discountAmount * 100,
               count: 1,
               barcode: dbProduct.barcode,
               classCode: dbProduct.catalogcode,
               name: dbProduct.name,
               vatPercent: Number(dbProduct.vat),
               packageCode: dbProduct.packagecode,
-              vat: product.vat,
+              vat:
+                product.amount - product.discountAmount === 0
+                  ? 0
+                  : (Math.round(
+                      (product.amount - product.discountAmount) * 100,
+                    ) /
+                      (100 + Number(dbProduct.vat), 4)) *
+                    100,
               label: product?.label,
             },
           });
@@ -313,10 +320,10 @@ export class ContractsService {
           name: product.name,
           packageCode: product.packageCode,
           vatPercent: Number(product.vatPercent),
-          price: product.amount * 100,
+          price: product.amount,
           amount: product.count * 1000,
-          other: product.other * 100,
-          vat: product.vat * 100,
+          other: product.other,
+          vat: product.vat,
           classCode: product.classCode,
           discount: 0,
         })),
