@@ -58,6 +58,7 @@ model Branches {
   token          String
   password       String
   companyAddress String
+  prefix         String
   users          Users[]
   catogries      Categories[]
   products       Products[]
@@ -152,7 +153,7 @@ model ContractProducts {
   name        String
   packageCode String
   classCode   String
-  label String?
+  label       String?
   product     Products  @relation(fields: [productId], references: [id], onDelete: NoAction)
   contract    Contracts @relation(fields: [contractId], references: [id], onDelete: Cascade)
 }
