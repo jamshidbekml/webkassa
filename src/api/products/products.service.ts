@@ -302,6 +302,8 @@ export class ProductsService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
+    delete updateProductDto.lables;
+
     return await this.prismaService.products.update({
       where: { id },
       data: updateProductDto,
