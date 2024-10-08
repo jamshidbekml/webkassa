@@ -23,7 +23,11 @@ export class TransformInterceptor<T>
       map((data) => {
         return typeof data == 'string'
           ? { message: data, success: true }
-          : { ...data, success: true };
+          : data?.data
+            ? { ...data, success: true }
+            : data?.error
+              ? { data, success: false }
+              : { data, success: true };
       }),
     );
   }

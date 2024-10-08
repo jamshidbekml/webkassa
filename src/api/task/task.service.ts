@@ -24,8 +24,6 @@ export class TaskService implements OnModuleInit {
         tokens[warehouse.inn] = token;
       }
 
-      console.log(tokens);
-
       const envFilePath = join(__dirname, '..', '..', '..', '..', '.env');
 
       let data = await fs.readFile(envFilePath, 'utf8');

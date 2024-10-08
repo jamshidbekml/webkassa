@@ -12,14 +12,16 @@ import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class ContractsService {
   constructor(private readonly prismaService: PrismaService) {}
+
   async create(createContractDto: CreateContractDto, branchId: string) {
     try {
       const isExist = await this.prismaService.contracts.findUnique({
         where: { contractId: createContractDto.contractId },
       });
+
       if (isExist) throw new BadRequestException('Bunday shartnoma mavjud');
 
-      await this.prismaService.$transaction(async (prisma) => {
+      return await this.prismaService.$transaction(async (prisma) => {
         const newContract = await prisma.contracts.create({
           data: {
             branchId,
@@ -38,7 +40,8 @@ export class ContractsService {
               id: product.productId,
             },
           });
-          if (dbProduct.count < product.count)
+
+          if (dbProduct.count === 0)
             throw new BadRequestException(
               'Omborda mahsulot mavjud emas yoki qolmagan!',
             );
@@ -86,7 +89,7 @@ export class ContractsService {
 
             if (!productMark || productMark.sold)
               throw new BadRequestException(
-                'Bunday MXIK mavjud emas yoki sotilgan!',
+                'Bunday markerovka mavjud emas yoki sotilgan!',
               );
 
             await prisma.productMarks.update({
@@ -96,7 +99,7 @@ export class ContractsService {
           }
         }
 
-        return 'Shartnoma yaratildi!';
+        return newContract;
       });
     } catch (err) {
       throw new BadRequestException(err.message);
@@ -118,8 +121,6 @@ export class ContractsService {
           },
         },
       });
-
-      console.log(foundProduct);
 
       if (!foundProduct || foundProduct.name !== product.name)
         throw new BadRequestException(
@@ -279,6 +280,7 @@ export class ContractsService {
             vatPercent: true,
             vat: true,
             name: true,
+            label: true,
           },
         },
         receipt: {
@@ -325,6 +327,7 @@ export class ContractsService {
           vat: product.vat,
           classCode: product.classCode,
           discount: 0,
+          label: product.label,
         })),
         receipt: contract.receipt,
       },
@@ -337,11 +340,11 @@ export class ContractsService {
         where: { id },
         include: {
           receipt: { select: { type: true } },
-          products: { select: { productId: true, classCode: true } },
+          products: { select: { productId: true, label: true } },
         },
       });
 
-      if (contract.receipt)
+      if (contract.receipt.length)
         throw new NotFoundException(
           "Shartnomaga to'lov qilingan, texniklar bilan bog'laning!",
         );
@@ -357,9 +360,9 @@ export class ContractsService {
             },
           });
 
-          if (product.classCode) {
+          if (product.label) {
             await prisma.productMarks.update({
-              where: { label: product.classCode },
+              where: { label: product.label },
               data: {
                 sold: false,
               },

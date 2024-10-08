@@ -2,9 +2,33 @@ import {
   IsArray,
   IsDefined,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
 } from 'class-validator';
+
+class ProductDto {
+  @IsDefined()
+  @IsNotEmpty()
+  @IsUUID('4')
+  productId: string;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @IsNumber()
+  amount: number;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @IsNumber()
+  discountAmount: number;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  label?: string;
+}
 
 export class CreateContractDto {
   @IsDefined()
@@ -20,7 +44,7 @@ export class CreateContractDto {
   @IsOptional()
   @IsNotEmpty()
   @IsString()
-  secondPhone: string;
+  secondPhone?: string;
 
   @IsDefined()
   @IsNotEmpty()
@@ -40,11 +64,5 @@ export class CreateContractDto {
   @IsDefined()
   @IsNotEmpty()
   @IsArray()
-  products: {
-    productId: string;
-    count: number;
-    amount: number;
-    discountAmount: number;
-    label?: string;
-  }[];
+  products: ProductDto[];
 }
