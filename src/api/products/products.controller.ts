@@ -1,6 +1,11 @@
-import { Body, Controller, Param, Query, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Query, Req } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { NestedSerialize } from '../interceptors/nested-serialize.interceptor';
 import { ProductsResDto } from './dto/products.dto';
 import { Request } from 'express';
@@ -89,8 +94,10 @@ export class ProductsController {
     return this.productsService.findOne(id);
   }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.productsService.remove(+id);
-  // }
+  @ApiOperation({ summary: 'Delete product' })
+  @ApiParam({ name: 'id', type: 'string' })
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.productsService.remove(id);
+  }
 }

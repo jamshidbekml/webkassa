@@ -198,6 +198,8 @@ export class ProductsService {
           branchId: branchId,
           catalogcode: createProductDto.catalogcode,
           barcode: createProductDto.barcode,
+          amount: +createProductDto.amount,
+          discountAmount: +createProductDto.discountAmount,
         });
 
         if (createProductDto?.lables) {
@@ -301,7 +303,15 @@ export class ProductsService {
     });
   }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} product`;
-  // }
+  async remove(id: string) {
+    const product = this.prismaService.products.findUnique({
+      where: { id },
+    });
+
+    if (!product) throw new NotFoundException('Mahsulot topilmadi');
+
+    await this.prismaService.products.delete({ where: { id } });
+
+    return 'Mahsulot muvaffaqqiyatli o`chirildi';
+  }
 }
