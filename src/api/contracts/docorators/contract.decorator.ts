@@ -8,6 +8,7 @@ export function CreateContract(routeName?: string) {
       schema: {
         type: 'object',
         properties: {
+          isOldContract: { type: 'boolean' },
           contractId: { type: 'string' },
           clientFullName: { type: 'string' },
           phone: { type: 'string' },

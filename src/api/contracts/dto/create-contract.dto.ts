@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsBoolean,
   IsDefined,
   IsNotEmpty,
   IsNumber,
@@ -31,6 +32,11 @@ class ProductDto {
 }
 
 export class CreateContractDto {
+  @IsOptional()
+  @IsNotEmpty()
+  @IsBoolean()
+  isOldContract?: boolean;
+
   @IsDefined()
   @IsNotEmpty()
   @IsString()

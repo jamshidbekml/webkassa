@@ -129,6 +129,7 @@ model Contracts {
   branchId       String             @db.Uuid
   previous       Boolean            @default(false)
   branch         Branches           @relation(fields: [branchId], references: [id])
+  isOldContract  Boolean            @default(false)
   products       ContractProducts[]
   receipt        Receipts[]
 

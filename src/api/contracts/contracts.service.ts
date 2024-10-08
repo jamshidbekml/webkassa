@@ -31,6 +31,7 @@ export class ContractsService {
             pinfl: createContractDto.pinfl,
             passportSeries: createContractDto.passportSeries,
             clientFullName: createContractDto.clientFullName,
+            isOldContract: createContractDto.isOldContract,
           },
         });
 
@@ -304,6 +305,7 @@ export class ContractsService {
     return {
       data: {
         id: contract.id,
+        isOldContract: contract.isOldContract,
         secondPhone: contract.secondPhone,
         passportSeries: contract.passportSeries,
         pinfl: contract.pinfl,
