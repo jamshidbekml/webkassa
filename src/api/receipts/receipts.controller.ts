@@ -1,11 +1,10 @@
 import { Controller, Req, Body, Query, Param } from '@nestjs/common';
 import { ReceiptsService } from './receipts.service';
-import { CreatePaymentDto, CreateReceiptDto } from './dto/create-receipt.dto';
+import { CreateReceiptDto } from './dto/create-receipt.dto';
 import { Request } from 'express';
 import {
   AddPayment,
   CreateReceipt,
-  GetAllPayments,
   GetAllReceipts,
   GetReceipt,
 } from './decorators/receipts.decorator';
@@ -54,31 +53,10 @@ export class ReceiptsController {
   addPayment(
     @Req() req: Request,
     @Param('id') saleId: string,
-    @Body() body: CreatePaymentDto,
+    @Body() body: CreateReceiptDto,
   ) {
-    const { sub } = req['user'] as { sub: string };
-    return this.receiptsService.createPayment(sub, saleId, body);
-  }
-
-  @GetAllPayments('payments')
-  getAllPayments(
-    @Req() req: Request,
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
-    @Query('search') search?: string,
-    @Query('from')
-    from?: Date,
-    @Query('to') to?: Date,
-  ) {
-    const { branchId } = req['user'] as { branchId: string };
-    return this.receiptsService.findPayments(
-      branchId,
-      +page,
-      +limit,
-      search,
-      from,
-      to,
-    );
+    const { branchId, sub } = req['user'] as { branchId: string; sub: string };
+    return this.receiptsService.createPayment(body, sub, branchId);
   }
 
   @GetReceipt(':id')

@@ -1,13 +1,12 @@
-import { RECEIPT_TYPE } from '@prisma/client';
 import {
   IsArray,
   IsDefined,
-  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsNumberString,
   IsOptional,
   IsString,
+  IsUUID,
 } from 'class-validator';
 
 export class CreateReceiptDto {
@@ -68,12 +67,7 @@ export class CreateReceiptDto {
 
   @IsDefined()
   @IsNotEmpty()
-  @IsEnum(RECEIPT_TYPE)
-  type: RECEIPT_TYPE;
-
-  @IsDefined()
-  @IsNotEmpty()
-  @IsString()
+  @IsUUID('4')
   contractId: string;
 
   @IsOptional()
@@ -85,21 +79,19 @@ export class CreateReceiptDto {
   @IsNotEmpty()
   @IsArray()
   products?: { productId: string; count: number }[];
-}
-
-export class CreatePaymentDto {
-  @IsDefined()
-  @IsNotEmpty()
-  @IsNumber()
-  amount: number;
 
   @IsDefined()
   @IsNotEmpty()
   @IsNumber()
-  receivedCash: number;
+  received: number;
 
   @IsDefined()
   @IsNotEmpty()
   @IsNumber()
-  receivedCard: number;
+  cash: number;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @IsNumber()
+  card: number;
 }

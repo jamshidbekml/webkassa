@@ -283,9 +283,7 @@ export class ContractsService {
             label: true,
           },
         },
-        receipt: {
-          include: { payments: true },
-        },
+        receipt: true,
         branch: {
           select: {
             name: true,

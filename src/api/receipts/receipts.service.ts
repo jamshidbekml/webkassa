@@ -1,11 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
-import { CreatePaymentDto, CreateReceiptDto } from './dto/create-receipt.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { CreateReceiptDto } from './dto/create-receipt.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { RECEIPT_TYPE, Payments } from '@prisma/client';
+import { RECEIPT_TYPE } from '@prisma/client';
 import { writeTransactionToSat } from '../shared/utils/write-payment-to-sat';
 
 @Injectable()
@@ -18,85 +14,46 @@ export class ReceiptsService {
     branchId: string,
   ) {
     try {
-      const { data, payment } = await this.prismaService.$transaction(
-        async (prisma) => {
-          const receipt = await prisma.receipts.create({
-            data: {
-              cashierId: userId,
-              branchId,
-              contractId: createReceiptDto.contractId,
-              type: createReceiptDto.type,
-              receiptSeq: createReceiptDto.receiptSeq,
-              dateTime: createReceiptDto.dateTime,
-              fiscalSign: createReceiptDto.fiscalSign,
-              terminalId: createReceiptDto.terminalId,
-              qrCodeURL: createReceiptDto.qrCodeURL,
-              companyName: createReceiptDto.companyName,
-              companyAddress: createReceiptDto.companyAddress,
-              companyINN: createReceiptDto.companyINN,
-              phoneNumber: createReceiptDto.phoneNumber,
-              clientName: createReceiptDto.clientName,
-              staffName: createReceiptDto.staffName,
-            },
-          });
+      const { data } = await this.prismaService.$transaction(async (prisma) => {
+        const receipt = await prisma.receipts.create({
+          data: {
+            cashierId: userId,
+            branchId,
+            contractId: createReceiptDto.contractId,
+            type: 'sale',
+            receiptSeq: createReceiptDto.receiptSeq,
+            dateTime: createReceiptDto.dateTime,
+            fiscalSign: createReceiptDto.fiscalSign,
+            terminalId: createReceiptDto.terminalId,
+            qrCodeURL: createReceiptDto.qrCodeURL,
+            companyName: createReceiptDto.companyName,
+            companyAddress: createReceiptDto.companyAddress,
+            companyINN: createReceiptDto.companyINN,
+            phoneNumber: createReceiptDto.phoneNumber,
+            clientName: createReceiptDto.clientName,
+            staffName: createReceiptDto.staffName,
+            received: createReceiptDto.received,
+            card: createReceiptDto.card,
+            cash: createReceiptDto.cash,
+          },
+        });
 
-          let payment: Payments;
-          if (createReceiptDto?.payments) {
-            payment = await prisma.payments.create({
+        if (createReceiptDto?.products?.length) {
+          for await (const product of createReceiptDto.products) {
+            await prisma.products.update({
+              where: {
+                id: product.productId,
+              },
               data: {
-                receiptId: receipt.id,
-                amount: createReceiptDto?.payments.amount,
-                cashierId: userId,
-                receivedCard: createReceiptDto?.payments.receivedCard,
-                receivedCash: createReceiptDto?.payments.receivedCash,
+                count: {
+                  decrement: product.count,
+                },
               },
             });
           }
-
-          if (createReceiptDto?.products?.length) {
-            for await (const product of createReceiptDto.products) {
-              await prisma.products.update({
-                where: {
-                  id: product.productId,
-                },
-                data: {
-                  count: {
-                    decrement: product.count,
-                  },
-                },
-              });
-            }
-          }
-          return { data: receipt, payment };
-        },
-      );
-
-      if (payment) {
-        const user = await this.prismaService.users.findUnique({
-          where: { id: userId },
-        });
-        const written = await writeTransactionToSat({
-          receivedCash: payment.receivedCash,
-          receivedCard: payment.receivedCard,
-          contractid: createReceiptDto.contractId,
-          user: `${user.firstName} ${user.lastName} ${user.middleName}`,
-          userId: user.satId,
-        });
-
-        if (!written) {
-          throw new InternalServerErrorException(
-            "SATga yozishda xatolik yuz berdi. To'lovni qaytadan yuborishni unutmang!",
-          );
         }
-        await this.prismaService.payments.update({
-          where: {
-            id: payment.id,
-          },
-          data: {
-            written: true,
-          },
-        });
-      }
+        return { data: receipt };
+      });
 
       return {
         data: data,
@@ -172,14 +129,14 @@ export class ReceiptsService {
             secondPhone: true,
           },
         },
-        payments: {
-          select: { amount: true, receivedCash: true, receivedCard: true },
-        },
         terminalId: true,
         receiptSeq: true,
         fiscalSign: true,
         dateTime: true,
         qrCodeURL: true,
+        received: true,
+        card: true,
+        cash: true,
       },
       skip: (page - 1) * limit,
       take: limit,
@@ -229,9 +186,6 @@ export class ReceiptsService {
       where: { id },
       include: {
         cashier: { select: { firstName: true, lastName: true } },
-        payments: {
-          include: { cashier: { select: { firstName: true, lastName: true } } },
-        },
       },
     });
 
@@ -239,37 +193,65 @@ export class ReceiptsService {
     return { data: receipt };
   }
 
-  async createPayment(userId: string, saleId: string, body: CreatePaymentDto) {
+  async createPayment(
+    createReceiptDto: CreateReceiptDto,
+    userId: string,
+    branchId: string,
+  ) {
     try {
-      const receipt = await this.prismaService.receipts.findUnique({
-        where: { id: saleId },
-        include: {
-          contract: {
-            select: {
-              contractId: true,
+      const { receipt } = await this.prismaService.$transaction(
+        async (prisma) => {
+          const receipt = await prisma.receipts.create({
+            data: {
+              cashierId: userId,
+              branchId,
+              contractId: createReceiptDto.contractId,
+              type: 'credit',
+              receiptSeq: createReceiptDto.receiptSeq,
+              dateTime: createReceiptDto.dateTime,
+              fiscalSign: createReceiptDto.fiscalSign,
+              terminalId: createReceiptDto.terminalId,
+              qrCodeURL: createReceiptDto.qrCodeURL,
+              companyName: createReceiptDto.companyName,
+              companyAddress: createReceiptDto.companyAddress,
+              companyINN: createReceiptDto.companyINN,
+              phoneNumber: createReceiptDto.phoneNumber,
+              clientName: createReceiptDto.clientName,
+              staffName: createReceiptDto.staffName,
+              received: createReceiptDto.received,
+              card: createReceiptDto.card,
+              cash: createReceiptDto.cash,
             },
-          },
-        },
-      });
+            include: {
+              contract: true,
+            },
+          });
 
-      if (!receipt)
-        throw new BadRequestException('Bunday savdo cheki topilmadi');
-      const payment = await this.prismaService.payments.create({
-        data: {
-          amount: +body.amount * 100,
-          receivedCard: +body.receivedCard * 100,
-          receivedCash: +body.receivedCash * 100,
-          cashierId: userId,
-          receiptId: receipt.id,
+          if (createReceiptDto?.products?.length) {
+            for await (const product of createReceiptDto.products) {
+              await prisma.products.update({
+                where: {
+                  id: product.productId,
+                },
+                data: {
+                  count: {
+                    decrement: product.count,
+                  },
+                },
+              });
+            }
+          }
+          return { receipt };
         },
-      });
+      );
 
       const user = await this.prismaService.users.findUnique({
         where: { id: userId },
       });
+
       const written = await writeTransactionToSat({
-        receivedCard: +body.receivedCard * 100,
-        receivedCash: +body.receivedCash * 100,
+        receivedCard: +createReceiptDto.card * 100,
+        receivedCash: +createReceiptDto.cash * 100,
         contractid: receipt.contract.contractId,
         user: `${user.firstName} ${user.lastName} ${user.middleName}`,
         userId: user.satId,
@@ -280,9 +262,9 @@ export class ReceiptsService {
           "SATga yozib bo'lmadi. To'lovni qayta yuborishni unutmang!",
         );
 
-      await this.prismaService.payments.update({
+      await this.prismaService.receipts.update({
         where: {
-          id: payment.id,
+          id: receipt.id,
         },
         data: {
           written: true,
@@ -293,124 +275,5 @@ export class ReceiptsService {
     } catch (err) {
       throw new BadRequestException(err.message);
     }
-  }
-
-  async findPayments(
-    branchId: string,
-    page: number,
-    limit: number,
-    search?: string,
-    startDate?: Date,
-    endDate?: Date,
-  ) {
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-
-    const todayEnd = new Date();
-    todayEnd.setHours(23, 59, 59, 999);
-
-    const effectiveStartDate = startDate ?? todayStart;
-    const effectiveEndDate = endDate ?? todayEnd;
-    const payments = await this.prismaService.payments.findMany({
-      where: {
-        receipt: {
-          branchId,
-        },
-        ...(search
-          ? {
-              OR: [
-                {
-                  receipt: {
-                    contract: {
-                      OR: [
-                        { phone: { contains: search, mode: 'insensitive' } },
-                        {
-                          contractId: { contains: search, mode: 'insensitive' },
-                        },
-                        {
-                          pinfl: { contains: search, mode: 'insensitive' },
-                        },
-                        {
-                          passportSeries: {
-                            contains: search,
-                            mode: 'insensitive',
-                          },
-                        },
-                        {
-                          clientFullName: {
-                            contains: search,
-                            mode: 'insensitive',
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              ],
-            }
-          : {
-              createdAt: {
-                gte: new Date(effectiveStartDate),
-                lte: new Date(effectiveEndDate),
-              },
-            }),
-      },
-      include: { receipt: true },
-      skip: (page - 1) * limit,
-      take: limit,
-    });
-
-    const total = await this.prismaService.payments.count({
-      where: {
-        receipt: {
-          branchId,
-        },
-        ...(search
-          ? {
-              OR: [
-                {
-                  receipt: {
-                    contract: {
-                      OR: [
-                        { phone: { contains: search, mode: 'insensitive' } },
-                        {
-                          contractId: { contains: search, mode: 'insensitive' },
-                        },
-                        {
-                          pinfl: { contains: search, mode: 'insensitive' },
-                        },
-                        {
-                          passportSeries: {
-                            contains: search,
-                            mode: 'insensitive',
-                          },
-                        },
-                        {
-                          clientFullName: {
-                            contains: search,
-                            mode: 'insensitive',
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              ],
-            }
-          : {
-              createdAt: {
-                gte: new Date(effectiveStartDate),
-                lte: new Date(effectiveEndDate),
-              },
-            }),
-      },
-    });
-
-    return {
-      data: payments,
-      pageSize: limit,
-      total,
-      current: page,
-    };
   }
 }

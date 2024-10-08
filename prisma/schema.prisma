@@ -46,7 +46,6 @@ model Users {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   receipts  Receipts[]
-  payments  Payments[]
 
   @@map("users")
 }
@@ -178,26 +177,14 @@ model Receipts {
   contract       Contracts    @relation(fields: [contractId], references: [id], onDelete: NoAction)
   branchId       String       @db.Uuid
   branch         Branches     @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  written      Boolean  @default(false)
+  received Int
+  cash Int
+  card Int
   createdAt      DateTime     @default(now())
-
-  payments Payments[]
+  updatedAt DateTime @updatedAt
 
   @@map("receipts")
-}
-
-model Payments {
-  id           String   @id @default(uuid()) @db.Uuid
-  amount       Int
-  written      Boolean  @default(false)
-  receivedCash Int
-  receivedCard Int
-  receiptId    String   @db.Uuid
-  receipt      Receipts @relation(fields: [receiptId], references: [id], onDelete: Cascade)
-  cashierId    String   @db.Uuid
-  cashier      Users    @relation(fields: [cashierId], references: [id], onDelete: NoAction)
-  createdAt    DateTime @default(now())
-
-  @@map("payments")
 }
 
 model FetchedDocuments {
