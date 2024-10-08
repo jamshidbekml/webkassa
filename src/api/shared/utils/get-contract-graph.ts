@@ -8,7 +8,8 @@ export async function getContractGraphFromSat(contractId: string) {
     const token = Buffer.from(
       `${config.get('SAT_USERNAME')}:${config.get('SAT_PASSWORD')}`,
     ).toString('base64');
-    const data = await axios.get<{
+
+    const { data } = await axios.get<{
       grafik: {
         nomer: number;
         sana: string;
@@ -40,7 +41,9 @@ export async function getContractGraphFromSat(contractId: string) {
       },
     );
 
-    return data.data;
+    console.log(data);
+
+    return data;
   } catch (err) {
     throw new BadRequestException(err.message);
   }
