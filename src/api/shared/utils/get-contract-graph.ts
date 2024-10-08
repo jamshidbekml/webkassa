@@ -10,28 +10,30 @@ export async function getContractGraphFromSat(contractId: string) {
     ).toString('base64');
 
     const { data } = await axios.get<{
-      grafik: {
-        nomer: number;
-        sana: string;
-        summa: number;
-        tulov: number;
-        qoldiq: number;
-        yopildi: boolean;
-      }[];
-      tulov: {
-        id: number;
-        sana: string;
-        naqd: number;
-        plastik: number;
-        boshqa_nomi: string;
-        boshqa: number;
-        chegirma: number;
-        bonus_naqd: number;
-        bonus_plastik: number;
-        bonus_jami: number;
-        tasdiqlandi: number;
-        tasdiqladi: string;
-      }[];
+      data: {
+        grafik: {
+          nomer: number;
+          sana: string;
+          summa: number;
+          tulov: number;
+          qoldiq: number;
+          yopildi: boolean;
+        }[];
+        tulov: {
+          id: number;
+          sana: string;
+          naqd: number;
+          plastik: number;
+          boshqa_nomi: string;
+          boshqa: number;
+          chegirma: number;
+          bonus_naqd: number;
+          bonus_plastik: number;
+          bonus_jami: number;
+          tasdiqlandi: number;
+          tasdiqladi: string;
+        }[];
+      };
     }>(
       `${config.get('SAT_URL')}/api/v1/clients/contracts?branch=${contractId.split('_')[0].toLowerCase()}&shraqam=${contractId}`,
       {
@@ -41,9 +43,7 @@ export async function getContractGraphFromSat(contractId: string) {
       },
     );
 
-    console.log(data);
-
-    return data;
+    return data.data;
   } catch (err) {
     throw new BadRequestException(err.message);
   }
