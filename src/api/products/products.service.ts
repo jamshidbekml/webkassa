@@ -139,91 +139,96 @@ export class ProductsService {
 
   async createManual(createProductDto: CreateProductDto, branchId: string) {
     try {
-      let category = await this.prismaService.categories.findUnique({
-        where: { code: createProductDto.catalogcode.slice(0, 5) },
-      });
-
-      if (!category) {
-        const catalogName = await getCategoryName(
-          createProductDto.catalogcode.slice(0, 5),
-        );
-
-        category = await this.prismaService.categories.create({
-          data: {
-            code: createProductDto.catalogcode.slice(0, 5),
-            name: catalogName,
-            branchId: branchId,
-          },
-        });
-      }
-
-      const existProduct = await this.prismaService.products.findFirst({
-        where: { name: createProductDto.name },
-      });
-
-      if (existProduct && existProduct.name == createProductDto.name) {
-        await this.prismaService.products.update({
-          where: { id: existProduct.id },
-          data: { count: existProduct.count + Number(createProductDto.count) },
+      return await this.prismaService.$transaction(async (prisma) => {
+        let category = await prisma.categories.findUnique({
+          where: { code: createProductDto.catalogcode.slice(0, 5) },
         });
 
-        if (createProductDto?.lables) {
-          await this.prismaService.products.update({
+        if (!category) {
+          const catalogName = await getCategoryName(
+            createProductDto.catalogcode.slice(0, 5),
+          );
+
+          category = await prisma.categories.create({
+            data: {
+              code: createProductDto.catalogcode.slice(0, 5),
+              name: catalogName,
+              branchId: branchId,
+            },
+          });
+        }
+
+        const existProduct = await prisma.products.findFirst({
+          where: { name: createProductDto.name },
+        });
+
+        if (existProduct && existProduct.name == createProductDto.name) {
+          await prisma.products.update({
             where: { id: existProduct.id },
             data: {
-              isMarked: true,
+              count: existProduct.count + Number(createProductDto.count),
             },
           });
-          for await (const mark of createProductDto.lables) {
-            await this.prismaService.productMarks.create({
+
+          if (createProductDto?.lables) {
+            await prisma.products.update({
+              where: { id: existProduct.id },
               data: {
-                label: mark,
-                productId: existProduct.id,
+                isMarked: true,
               },
             });
+
+            for await (const mark of createProductDto.lables) {
+              await prisma.productMarks.create({
+                data: {
+                  label: mark,
+                  productId: existProduct.id,
+                },
+              });
+            }
           }
-        }
 
-        return {
-          data: existProduct,
-          message: 'Mahsulot muvaffaqqiyatli taratildi',
-        };
-      } else {
-        const newProduct = await this.create({
-          name: createProductDto.name,
-          packagecode: createProductDto.packagecode,
-          count: +createProductDto.count,
-          vat: createProductDto.vat,
-          categoryId: category.id,
-          branchId: branchId,
-          catalogcode: createProductDto.catalogcode,
-          barcode: createProductDto.barcode,
-          amount: +createProductDto.amount,
-          discountAmount: +createProductDto.discountAmount,
-        });
-
-        if (createProductDto?.lables) {
-          await this.prismaService.products.update({
-            where: { id: newProduct.id },
-            data: {
-              isMarked: true,
-            },
+          return {
+            data: existProduct,
+            message: 'Mahsulot muvaffaqqiyatli tahrirlandi',
+          };
+        } else {
+          const newProduct = await this.create({
+            name: createProductDto.name,
+            packagecode: createProductDto.packagecode,
+            count: +createProductDto.count,
+            vat: createProductDto.vat,
+            categoryId: category.id,
+            branchId: branchId,
+            catalogcode: createProductDto.catalogcode,
+            barcode: createProductDto.barcode,
+            amount: +createProductDto.amount,
+            discountAmount: +createProductDto.discountAmount,
           });
-          for await (const mark of createProductDto.lables) {
-            await this.prismaService.productMarks.create({
+
+          if (createProductDto?.lables) {
+            await prisma.products.update({
+              where: { id: newProduct.id },
               data: {
-                label: mark,
-                productId: newProduct.id,
+                isMarked: true,
               },
             });
+            for await (const mark of createProductDto.lables) {
+              await prisma.productMarks.create({
+                data: {
+                  label: mark,
+                  productId: newProduct.id,
+                },
+              });
+            }
           }
-        }
 
-        return {
-          data: newProduct,
-          message: 'Mahsulot muvaffaqqiyatli taratildi',
-        };
-      }
+          return {
+            data: newProduct,
+            message: 'Mahsulot muvaffaqqiyatli taratildi',
+          };
+        }
+      });
     } catch (e) {
       throw new InternalServerErrorException(e.message);
     }
