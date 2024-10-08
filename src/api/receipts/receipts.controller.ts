@@ -49,12 +49,8 @@ export class ReceiptsController {
     );
   }
 
-  @AddPayment('add/:id')
-  addPayment(
-    @Req() req: Request,
-    @Param('id') saleId: string,
-    @Body() body: CreateReceiptDto,
-  ) {
+  @AddPayment('add')
+  addPayment(@Req() req: Request, @Body() body: CreateReceiptDto) {
     const { branchId, sub } = req['user'] as { branchId: string; sub: string };
     return this.receiptsService.createPayment(body, sub, branchId);
   }
