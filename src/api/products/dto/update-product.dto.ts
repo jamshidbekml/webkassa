@@ -47,4 +47,9 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
   @IsNotEmpty()
   @IsString()
   catalogcode?: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  barcode?: string;
 }
