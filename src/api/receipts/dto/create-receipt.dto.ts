@@ -6,7 +6,6 @@ import {
   IsNumberString,
   IsOptional,
   IsString,
-  IsUUID,
 } from 'class-validator';
 
 export class CreateReceiptDto {
@@ -67,7 +66,7 @@ export class CreateReceiptDto {
 
   @IsDefined()
   @IsNotEmpty()
-  @IsUUID('4')
+  @IsString()
   contractId: string;
 
   @IsOptional()
