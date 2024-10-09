@@ -69,14 +69,14 @@ export class ReceiptsService {
           return receipt;
         }
 
-        const receiptExist = await prisma.contracts.findMany({
+        const receiptExist = await prisma.receipts.findMany({
           where: { contractId: contract.contractId },
           orderBy: { createdAt: 'asc' },
         });
 
         console.log(receiptExist);
 
-        const receiptType = receiptExist.length >= 1 ? 'credit' : 'sale';
+        const receiptType = receiptExist.length ? 'credit' : 'sale';
         const receipt = await prisma.receipts.create({
           data: {
             cashierId: userId,
