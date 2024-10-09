@@ -387,6 +387,7 @@ export class ContractsService {
             receipt: receipts,
             graph: graph.data,
             payments: graph.payments,
+            previous: true,
           },
         };
       }
@@ -429,6 +430,7 @@ export class ContractsService {
           receipt: receipts,
           graph: graph.data,
           payments: graph.payments,
+          previous: receipts.length ? true : false,
         },
       };
     } catch (error) {
