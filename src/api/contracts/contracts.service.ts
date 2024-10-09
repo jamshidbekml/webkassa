@@ -275,6 +275,7 @@ export class ContractsService {
         pinfl: true,
         createdAt: true,
         closed: true,
+        clientFullName: true,
       },
       skip: (page - 1) * limit,
       take: limit,
@@ -298,6 +299,7 @@ export class ContractsService {
             phone: contract.phone1,
             pinfl: contract.pnfl,
             secondPhone: contract.phone2,
+            clientFullName: contract.fio,
           });
         }
     }
