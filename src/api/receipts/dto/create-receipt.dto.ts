@@ -78,7 +78,19 @@ export class CreateReceiptDto {
   @IsOptional()
   @IsNotEmpty()
   @IsArray()
-  products?: { productId: string; count: number }[];
+  products?: {
+    productId: string;
+    count: number;
+    amount: number;
+    discountAmount: number;
+    barcode: string;
+    vatPercent: number;
+    vat: number;
+    name: string;
+    packageCode: string;
+    classCode: string;
+    label?: string;
+  }[];
 
   @IsDefined()
   @IsNotEmpty()

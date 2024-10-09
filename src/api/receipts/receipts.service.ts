@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateReceiptDto } from './dto/create-receipt.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { RECEIPT_TYPE } from '@prisma/client';
@@ -14,13 +18,26 @@ export class ReceiptsService {
     branchId: string,
   ) {
     try {
-      const { data } = await this.prismaService.$transaction(async (prisma) => {
+      const receipt = await this.prismaService.$transaction(async (prisma) => {
+        const contract = await prisma.contracts.findUnique({
+          where: { id: createReceiptDto.contractId },
+        });
+
+        if (!contract)
+          throw new NotFoundException('Bunday shartnoma mavjud emas');
+
+        const receiptExist = await prisma.contracts.findFirst({
+          where: { contractId: contract.contractId },
+          orderBy: { createdAt: 'asc' },
+        });
+
+        const receiptType = receiptExist ? 'credit' : 'sale';
         const receipt = await prisma.receipts.create({
           data: {
             cashierId: userId,
             branchId,
             contractId: createReceiptDto.contractId,
-            type: 'sale',
+            type: receiptType,
             receiptSeq: createReceiptDto.receiptSeq,
             dateTime: createReceiptDto.dateTime,
             fiscalSign: createReceiptDto.fiscalSign,
@@ -38,26 +55,53 @@ export class ReceiptsService {
           },
         });
 
-        if (createReceiptDto?.products?.length) {
-          for await (const product of createReceiptDto.products) {
-            await prisma.products.update({
-              where: {
-                id: product.productId,
-              },
-              data: {
-                count: {
-                  decrement: product.count,
-                },
-              },
-            });
-          }
+        for await (const product of createReceiptDto.products) {
+          await prisma.receiptProducts.create({
+            data: {
+              receiptId: receipt.id,
+              amount: product.amount,
+              barcode: product.barcode,
+              classCode: product.classCode,
+              count: product.count,
+              name: product.name,
+              other: product.discountAmount,
+              packageCode: product.packageCode,
+              vatPercent: product.vatPercent,
+              vat: product.vat,
+              label: product?.label,
+              productId: product.productId,
+            },
+          });
         }
-        return { data: receipt };
+
+        return receipt;
       });
 
-      return {
-        data: data,
-      };
+      const user = await this.prismaService.users.findUnique({
+        where: { id: userId },
+      });
+
+      const written = await writeTransactionToSat({
+        receivedCard: +createReceiptDto.card * 100,
+        receivedCash: +createReceiptDto.cash * 100,
+        contractid: receipt.contractId,
+        user: `${user.firstName} ${user.lastName} ${user.middleName}`,
+        userId: user.satId,
+      });
+
+      if (!written)
+        throw new BadRequestException(
+          "SATga yozib bo'lmadi. To'lovni qayta yuborishni unutmang!",
+        );
+
+      await this.prismaService.receipts.update({
+        where: {
+          id: receipt.id,
+        },
+        data: {
+          written: true,
+        },
+      });
     } catch (err) {
       throw new BadRequestException(err.message);
     }
@@ -89,26 +133,17 @@ export class ReceiptsService {
           ? {
               OR: [
                 {
-                  contract: {
-                    OR: [
-                      { phone: { contains: search, mode: 'insensitive' } },
-                      { contractId: { contains: search, mode: 'insensitive' } },
-                      {
-                        pinfl: { contains: search, mode: 'insensitive' },
-                      },
-                      {
-                        passportSeries: {
-                          contains: search,
-                          mode: 'insensitive',
-                        },
-                      },
-                      {
-                        clientFullName: {
-                          contains: search,
-                          mode: 'insensitive',
-                        },
-                      },
-                    ],
+                  clientName: {
+                    contains: search,
+                    mode: 'insensitive',
+                  },
+                  phoneNumber: {
+                    contains: search,
+                    mode: 'insensitive',
+                  },
+                  contractId: {
+                    contains: search,
+                    mode: 'insensitive',
                   },
                 },
               ],
@@ -119,24 +154,6 @@ export class ReceiptsService {
                 lte: new Date(effectiveEndDate),
               },
             }),
-      },
-      select: {
-        contract: {
-          select: {
-            clientFullName: true,
-            phone: true,
-            contractId: true,
-            secondPhone: true,
-          },
-        },
-        terminalId: true,
-        receiptSeq: true,
-        fiscalSign: true,
-        dateTime: true,
-        qrCodeURL: true,
-        received: true,
-        card: true,
-        cash: true,
       },
       skip: (page - 1) * limit,
       take: limit,
@@ -186,94 +203,11 @@ export class ReceiptsService {
       where: { id },
       include: {
         cashier: { select: { firstName: true, lastName: true } },
+        products: true,
       },
     });
 
     if (!receipt) throw new BadRequestException('Bunday chek topilmadi');
     return { data: receipt };
-  }
-
-  async createPayment(
-    createReceiptDto: CreateReceiptDto,
-    userId: string,
-    branchId: string,
-  ) {
-    try {
-      const { receipt } = await this.prismaService.$transaction(
-        async (prisma) => {
-          const receipt = await prisma.receipts.create({
-            data: {
-              cashierId: userId,
-              branchId,
-              contractId: createReceiptDto.contractId,
-              type: 'credit',
-              receiptSeq: createReceiptDto.receiptSeq,
-              dateTime: createReceiptDto.dateTime,
-              fiscalSign: createReceiptDto.fiscalSign,
-              terminalId: createReceiptDto.terminalId,
-              qrCodeURL: createReceiptDto.qrCodeURL,
-              companyName: createReceiptDto.companyName,
-              companyAddress: createReceiptDto.companyAddress,
-              companyINN: createReceiptDto.companyINN,
-              phoneNumber: createReceiptDto.phoneNumber,
-              clientName: createReceiptDto.clientName,
-              staffName: createReceiptDto.staffName,
-              received: createReceiptDto.received,
-              card: createReceiptDto.card,
-              cash: createReceiptDto.cash,
-            },
-            include: {
-              contract: true,
-            },
-          });
-
-          if (createReceiptDto?.products?.length) {
-            for await (const product of createReceiptDto.products) {
-              await prisma.products.update({
-                where: {
-                  id: product.productId,
-                },
-                data: {
-                  count: {
-                    decrement: product.count,
-                  },
-                },
-              });
-            }
-          }
-          return { receipt };
-        },
-      );
-
-      const user = await this.prismaService.users.findUnique({
-        where: { id: userId },
-      });
-
-      const written = await writeTransactionToSat({
-        receivedCard: +createReceiptDto.card * 100,
-        receivedCash: +createReceiptDto.cash * 100,
-        contractid: receipt.contract.contractId,
-        user: `${user.firstName} ${user.lastName} ${user.middleName}`,
-        userId: user.satId,
-      });
-
-      if (!written)
-        throw new BadRequestException(
-          "SATga yozib bo'lmadi. To'lovni qayta yuborishni unutmang!",
-        );
-
-      await this.prismaService.receipts.update({
-        where: {
-          id: receipt.id,
-        },
-        data: {
-          written: true,
-        },
-      });
-
-      return `To'lov muvaffaqqiyatli qabul qilindi!`;
-    } catch (err) {
-      throw new BadRequestException(err.message);
-    }
   }
 }

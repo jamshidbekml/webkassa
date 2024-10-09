@@ -3,7 +3,6 @@ import { ReceiptsService } from './receipts.service';
 import { CreateReceiptDto } from './dto/create-receipt.dto';
 import { Request } from 'express';
 import {
-  AddPayment,
   CreateReceipt,
   GetAllReceipts,
   GetReceipt,
@@ -47,12 +46,6 @@ export class ReceiptsController {
       from,
       to,
     );
-  }
-
-  @AddPayment('add')
-  addPayment(@Req() req: Request, @Body() body: CreateReceiptDto) {
-    const { branchId, sub } = req['user'] as { branchId: string; sub: string };
-    return this.receiptsService.createPayment(body, sub, branchId);
   }
 
   @GetReceipt(':id')

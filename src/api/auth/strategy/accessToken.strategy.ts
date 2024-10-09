@@ -41,6 +41,7 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
       role: user.role,
       inn: user.branch?.inn,
       branchId: user.branchId,
+      prefix: user.branch?.prefix,
     };
   }
 }

@@ -27,7 +27,7 @@ enum PAYMENT_TYPE {
 enum RECEIPT_TYPE {
   sale
   credit
-  canceled
+  refund
 }
 
 model Users {
@@ -103,6 +103,7 @@ model Products {
   category         Categories         @relation(fields: [categoryId], references: [id])
   labels           ProductMarks[]
   contractProducts ContractProducts[]
+  receiptProducts  ReceiptProducts[]
 
   @@index([branchId, name, categoryId])
   @@map("products")
@@ -127,11 +128,9 @@ model Contracts {
   passportSeries String
   pinfl          String
   branchId       String             @db.Uuid
-  previous       Boolean            @default(false)
   branch         Branches           @relation(fields: [branchId], references: [id])
-  isOldContract  Boolean            @default(false)
   products       ContractProducts[]
-  receipt        Receipts[]
+  closed Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -159,7 +158,7 @@ model ContractProducts {
 }
 
 model Receipts {
-  id             String       @id @default(uuid()) @db.Uuid
+  id             String            @id @default(uuid()) @db.Uuid
   terminalId     String
   receiptSeq     String
   fiscalSign     String
@@ -172,20 +171,39 @@ model Receipts {
   phoneNumber    String
   clientName     String
   type           RECEIPT_TYPE
-  cashierId      String       @db.Uuid
-  cashier        Users        @relation(fields: [cashierId], references: [id], onDelete: NoAction)
-  contractId     String       @db.Uuid
-  contract       Contracts    @relation(fields: [contractId], references: [id], onDelete: NoAction)
-  branchId       String       @db.Uuid
-  branch         Branches     @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  written      Boolean  @default(false)
-  received Int
-  cash Int
-  card Int
-  createdAt      DateTime     @default(now())
-  updatedAt DateTime @updatedAt
+  cashierId      String            @db.Uuid
+  cashier        Users             @relation(fields: [cashierId], references: [id], onDelete: NoAction)
+  contractId     String
+  branchId       String            @db.Uuid
+  branch         Branches          @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  written        Boolean           @default(false)
+  received       Int
+  cash           Int
+  card           Int
+  products       ReceiptProducts[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
 
   @@map("receipts")
+}
+
+model ReceiptProducts {
+  id          String   @id @default(uuid()) @db.Uuid
+  receiptId   String   @db.Uuid
+  productId   String   @db.Uuid
+  count       Int
+  amount      Int
+  discount    Int?
+  other       Int
+  barcode     String
+  vatPercent  Int
+  vat         Int
+  name        String
+  packageCode String
+  classCode   String
+  label       String?
+  product     Products @relation(fields: [productId], references: [id], onDelete: NoAction)
+  receipt     Receipts @relation(fields: [receiptId], references: [id], onDelete: Cascade)
 }
 
 model FetchedDocuments {

@@ -50,7 +50,7 @@ export function GetContracts(routeName?: string) {
 export function GetContract(routeName?: string) {
   return applyDecorators(
     ApiOperation({ summary: 'Find Contract' }),
-    ApiParam({ name: 'id', type: 'string' }),
+    ApiParam({ name: 'id', type: 'string', description: 'SHARTNOMA RAQAMI' }),
     Get(routeName),
   );
 }
