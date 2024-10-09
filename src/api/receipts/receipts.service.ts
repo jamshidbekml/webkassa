@@ -48,6 +48,7 @@ export class ReceiptsService {
               received: createReceiptDto.received,
               card: createReceiptDto.card,
               cash: createReceiptDto.cash,
+              personWhoSold: user.firstName + user.lastName,
             },
           });
 
