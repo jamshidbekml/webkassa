@@ -83,8 +83,8 @@ export class ReceiptsService {
       });
 
       const written = await writeTransactionToSat({
-        receivedCard: +createReceiptDto.card * 100,
-        receivedCash: +createReceiptDto.cash * 100,
+        receivedCard: +createReceiptDto.card / 100,
+        receivedCash: +createReceiptDto.cash / 100,
         contractid: receipt.contractId,
         user: `${user.firstName} ${user.lastName} ${user.middleName}`,
         userId: user.satId,
