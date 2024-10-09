@@ -24,15 +24,58 @@ export class ReceiptsService {
           where: { contractId: createReceiptDto.contractId },
         });
 
-        if (!contract)
-          throw new NotFoundException('Bunday shartnoma mavjud emas');
+        if (!contract) {
+          const receipt = await prisma.receipts.create({
+            data: {
+              cashierId: userId,
+              branchId,
+              contractId: createReceiptDto.contractId,
+              type: 'sale',
+              receiptSeq: createReceiptDto.receiptSeq,
+              dateTime: createReceiptDto.dateTime,
+              fiscalSign: createReceiptDto.fiscalSign,
+              terminalId: createReceiptDto.terminalId,
+              qrCodeURL: createReceiptDto.qrCodeURL,
+              companyName: createReceiptDto.companyName,
+              companyAddress: createReceiptDto.companyAddress,
+              companyINN: createReceiptDto.companyINN,
+              phoneNumber: createReceiptDto.phoneNumber,
+              clientName: createReceiptDto.clientName,
+              staffName: createReceiptDto.staffName,
+              received: createReceiptDto.received,
+              card: createReceiptDto.card,
+              cash: createReceiptDto.cash,
+            },
+          });
 
-        const receiptExist = await prisma.contracts.findFirst({
+          for await (const product of createReceiptDto.products) {
+            await prisma.receiptProducts.create({
+              data: {
+                receiptId: receipt.id,
+                amount: product.amount,
+                barcode: product.barcode,
+                classCode: product.classCode,
+                count: product.count,
+                name: product.name,
+                other: product.discountAmount,
+                packageCode: product.packageCode,
+                vatPercent: product.vatPercent,
+                vat: product.vat,
+                label: product?.label,
+                productId: product.productId,
+              },
+            });
+          }
+
+          return receipt;
+        }
+
+        const receiptExist = await prisma.contracts.findMany({
           where: { contractId: contract.contractId },
           orderBy: { createdAt: 'asc' },
         });
 
-        const receiptType = receiptExist ? 'credit' : 'sale';
+        const receiptType = receiptExist.length ? 'credit' : 'sale';
         const receipt = await prisma.receipts.create({
           data: {
             cashierId: userId,

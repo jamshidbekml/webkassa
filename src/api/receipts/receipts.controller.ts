@@ -25,7 +25,6 @@ export class ReceiptsController {
   }
 
   @GetAllReceipts()
-  @NestedSerialize(GetReceiptsDto)
   findAll(
     @Req() req: Request,
     @Query('type') type: RECEIPT_TYPE,
