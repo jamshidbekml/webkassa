@@ -141,7 +141,7 @@ export class ProductsService {
     try {
       return await this.prismaService.$transaction(async (prisma) => {
         let category = await prisma.categories.findUnique({
-          where: { code: createProductDto.catalogcode.slice(0, 5) },
+          where: { id: createProductDto.categoryId },
         });
 
         if (!category) {
