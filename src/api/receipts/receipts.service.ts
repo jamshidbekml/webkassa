@@ -21,7 +21,7 @@ export class ReceiptsService {
     try {
       const receipt = await this.prismaService.$transaction(async (prisma) => {
         const contract = await prisma.contracts.findUnique({
-          where: { id: createReceiptDto.contractId },
+          where: { contractId: createReceiptDto.contractId },
         });
 
         if (!contract)
