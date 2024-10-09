@@ -126,27 +126,31 @@ export class ReceiptsService {
         return receipt;
       });
 
-      const written = await writeTransactionToSat({
-        receivedCard: +createReceiptDto.card / 100,
-        receivedCash: +createReceiptDto.cash / 100,
-        contractid: receipt.contractId,
-        user: `${user.firstName} ${user.lastName} ${user.middleName}`,
-        userId: user.satId,
-      });
+      if (receipt.type === 'credit') {
+        const written = await writeTransactionToSat({
+          receivedCard: +createReceiptDto.card / 100,
+          receivedCash: +createReceiptDto.cash / 100,
+          contractid: receipt.contractId,
+          user: `${user.firstName} ${user.lastName} ${user.middleName}`,
+          userId: user.satId,
+        });
 
-      if (!written)
-        throw new Error(
-          "SATga yozib bo'lmadi. To'lovni qayta yuborishni unutmang!",
-        );
+        if (!written)
+          throw new Error(
+            "SATga yozib bo'lmadi. To'lovni qayta yuborishni unutmang!",
+          );
 
-      await this.prismaService.receipts.update({
-        where: {
-          id: receipt.id,
-        },
-        data: {
-          written: true,
-        },
-      });
+        await this.prismaService.receipts.update({
+          where: {
+            id: receipt.id,
+          },
+          data: {
+            written: true,
+          },
+        });
+      }
+
+      return { data: receipt };
     } catch (err) {
       throw new InternalServerErrorException(err.message);
     }
