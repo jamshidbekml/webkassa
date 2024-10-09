@@ -351,7 +351,7 @@ export class ContractsService {
 
         const receipts = await this.prismaService.receipts.findMany({
           where: {
-            contractId: contract.contractId,
+            contractId: id,
           },
           orderBy: {
             createdAt: 'desc',
@@ -394,7 +394,7 @@ export class ContractsService {
 
       const receipts = await this.prismaService.receipts.findMany({
         where: {
-          contractId: contract.contractId,
+          contractId: id,
         },
         orderBy: {
           createdAt: 'desc',
