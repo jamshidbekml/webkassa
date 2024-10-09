@@ -130,7 +130,7 @@ model Contracts {
   branchId       String             @db.Uuid
   branch         Branches           @relation(fields: [branchId], references: [id])
   products       ContractProducts[]
-  closed Boolean @default(false)
+  closed         Boolean            @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -158,31 +158,33 @@ model ContractProducts {
 }
 
 model Receipts {
-  id             String            @id @default(uuid()) @db.Uuid
-  terminalId     String
-  receiptSeq     String
-  fiscalSign     String
-  dateTime       String
-  qrCodeURL      String
-  companyName    String
-  companyAddress String
-  companyINN     String
-  staffName      String
-  phoneNumber    String
-  clientName     String
-  type           RECEIPT_TYPE
-  cashierId      String            @db.Uuid
-  cashier        Users             @relation(fields: [cashierId], references: [id], onDelete: NoAction)
-  contractId     String
-  branchId       String            @db.Uuid
-  branch         Branches          @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  written        Boolean           @default(false)
-  received       Int
-  cash           Int
-  card           Int
-  products       ReceiptProducts[]
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
+  id                String            @id @default(uuid()) @db.Uuid
+  terminalId        String
+  receiptSeq        String
+  fiscalSign        String
+  dateTime          String
+  qrCodeURL         String
+  companyName       String
+  companyAddress    String
+  companyINN        String
+  staffName         String
+  phoneNumber       String
+  clientName        String
+  type              RECEIPT_TYPE
+  personWhoSold     String?
+  personWhoReturned String?
+  cashierId         String            @db.Uuid
+  cashier           Users             @relation(fields: [cashierId], references: [id], onDelete: NoAction)
+  contractId        String
+  branchId          String            @db.Uuid
+  branch            Branches          @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  written           Boolean           @default(false)
+  received          Int
+  cash              Int
+  card              Int
+  products          ReceiptProducts[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   @@map("receipts")
 }

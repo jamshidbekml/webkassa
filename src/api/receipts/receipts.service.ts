@@ -18,6 +18,10 @@ export class ReceiptsService {
     branchId: string,
   ) {
     try {
+      const user = await this.prismaService.users.findUnique({
+        where: { id: userId },
+      });
+
       const receipt = await this.prismaService.$transaction(async (prisma) => {
         const contract = await prisma.contracts.findUnique({
           where: { contractId: createReceiptDto.contractId },
@@ -74,8 +78,6 @@ export class ReceiptsService {
           orderBy: { createdAt: 'asc' },
         });
 
-        console.log(receiptExist);
-
         const receiptType = receiptExist.length ? 'credit' : 'sale';
         const receipt = await prisma.receipts.create({
           data: {
@@ -97,6 +99,7 @@ export class ReceiptsService {
             received: createReceiptDto.received,
             card: createReceiptDto.card,
             cash: createReceiptDto.cash,
+            personWhoSold: user.firstName + user.lastName,
           },
         });
 
@@ -120,10 +123,6 @@ export class ReceiptsService {
         }
 
         return receipt;
-      });
-
-      const user = await this.prismaService.users.findUnique({
-        where: { id: userId },
       });
 
       const written = await writeTransactionToSat({

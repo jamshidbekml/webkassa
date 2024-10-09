@@ -9,8 +9,6 @@ import {
 } from './decorators/receipts.decorator';
 import { RECEIPT_TYPE } from '@prisma/client';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { GetReceiptsDto } from './dto/receips.dto';
-import { NestedSerialize } from '../interceptors/nested-serialize.interceptor';
 
 @ApiBearerAuth()
 @ApiTags('receipts')
