@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
 } from '@nestjs/common';
 import { CreateReceiptDto } from './dto/create-receipt.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -75,7 +74,9 @@ export class ReceiptsService {
           orderBy: { createdAt: 'asc' },
         });
 
-        const receiptType = receiptExist.length ? 'credit' : 'sale';
+        console.log(receiptExist);
+
+        const receiptType = receiptExist.length >= 1 ? 'credit' : 'sale';
         const receipt = await prisma.receipts.create({
           data: {
             cashierId: userId,
