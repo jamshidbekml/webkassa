@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateReceiptDto } from './dto/create-receipt.dto';
@@ -90,7 +91,7 @@ export class ReceiptsService {
       });
 
       if (!written)
-        throw new BadRequestException(
+        throw new Error(
           "SATga yozib bo'lmadi. To'lovni qayta yuborishni unutmang!",
         );
 
@@ -103,7 +104,7 @@ export class ReceiptsService {
         },
       });
     } catch (err) {
-      throw new BadRequestException(err.message);
+      throw new InternalServerErrorException(err.message);
     }
   }
 
