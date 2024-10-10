@@ -7,6 +7,7 @@ import { CreateReceiptDto } from './dto/create-receipt.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { RECEIPT_TYPE } from '@prisma/client';
 import { writeTransactionToSat } from '../shared/utils/write-payment-to-sat';
+import { isUUID } from '../shared/utils/uuid-checker';
 
 @Injectable()
 export class ReceiptsService {
@@ -53,6 +54,11 @@ export class ReceiptsService {
           });
 
           for await (const product of createReceiptDto.products) {
+            if (!isUUID(product.productId))
+              throw new BadRequestException(
+                `ID: ${product.productId} uuid tipida emas!`,
+              );
+
             const existProduct = await prisma.products.findUnique({
               where: { id: product.productId },
             });
