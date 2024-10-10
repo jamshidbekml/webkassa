@@ -12,7 +12,7 @@ import {
 class ProductDto {
   @IsDefined()
   @IsNotEmpty()
-  @IsUUID('4')
+  @IsUUID()
   productId: string;
 
   @IsDefined()
