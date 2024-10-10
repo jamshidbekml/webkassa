@@ -6,7 +6,65 @@ import {
   IsNumberString,
   IsOptional,
   IsString,
+  IsUUID,
 } from 'class-validator';
+
+class ProductDto {
+  @IsDefined()
+  @IsNotEmpty()
+  @IsUUID('4')
+  productId: string;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @IsNumber()
+  count: number;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @IsNumber()
+  amount: number;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @IsNumber()
+  discountAmount: number;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  barcode: string;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @IsNumber()
+  vatPercent: number;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @IsNumber()
+  vat: number;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @IsString()
+  packageCode: string;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @IsString()
+  classCode: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  label?: string;
+}
 
 export class CreateReceiptDto {
   @IsDefined()
@@ -77,19 +135,7 @@ export class CreateReceiptDto {
   @IsOptional()
   @IsNotEmpty()
   @IsArray()
-  products?: {
-    productId: string;
-    count: number;
-    amount: number;
-    discountAmount: number;
-    barcode: string;
-    vatPercent: number;
-    vat: number;
-    name: string;
-    packageCode: string;
-    classCode: string;
-    label?: string;
-  }[];
+  products?: ProductDto[];
 
   @IsDefined()
   @IsNotEmpty()
