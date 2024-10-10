@@ -127,15 +127,10 @@ export class CreateReceiptDto {
   @IsString()
   contractId: string;
 
-  @IsOptional()
+  @IsDefined()
   @IsNotEmpty()
   @IsArray()
-  payments?: { amount: number; receivedCard: number; receivedCash: number };
-
-  @IsOptional()
-  @IsNotEmpty()
-  @IsArray()
-  products?: ProductDto[];
+  products: ProductDto[];
 
   @IsDefined()
   @IsNotEmpty()
