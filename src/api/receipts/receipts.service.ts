@@ -53,6 +53,15 @@ export class ReceiptsService {
           });
 
           for await (const product of createReceiptDto.products) {
+            const existProduct = await prisma.products.findUnique({
+              where: { id: product.productId },
+            });
+
+            if (!existProduct)
+              throw new BadRequestException(
+                `Mahsulot topilmadi! Mahsulot id: ${product.productId}`,
+              );
+
             await prisma.receiptProducts.create({
               data: {
                 receiptId: receipt.id,
@@ -67,6 +76,15 @@ export class ReceiptsService {
                 vat: product.vat,
                 label: product?.label,
                 productId: product.productId,
+              },
+            });
+
+            await prisma.products.update({
+              where: { id: product.productId },
+              data: {
+                count: {
+                  decrement: product.count,
+                },
               },
             });
           }
