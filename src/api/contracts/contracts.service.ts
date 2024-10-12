@@ -461,6 +461,8 @@ export class ContractsService {
 
       await this.prismaService.$transaction(async (prisma) => {
         for await (const product of contract.products) {
+          if (!product.productId) continue;
+
           await prisma.products.update({
             where: { id: product.productId },
             data: {
