@@ -314,6 +314,7 @@ export class ContractsService {
           products: {
             select: {
               id: true,
+              productId: true,
               amount: true,
               count: true,
               discount: true,
@@ -414,7 +415,7 @@ export class ContractsService {
           paycheckNumber: contract.contractId,
           clientName: contract.clientFullName,
           items: contract.products.map((product) => ({
-            id: product.id,
+            id: product.productId,
             barcode: product.barcode,
             name: product.name,
             packageCode: product.packageCode,
