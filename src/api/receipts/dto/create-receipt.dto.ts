@@ -72,12 +72,12 @@ export class CreateReceiptDto {
   @IsString()
   terminalId: string;
 
-  @IsDefined()
+  @IsOptional()
   @IsNotEmpty()
   @IsNumberString()
   receiptSeq: string;
 
-  @IsDefined()
+  @IsOptional()
   @IsNotEmpty()
   @IsNumberString()
   fiscalSign: string;
@@ -87,7 +87,7 @@ export class CreateReceiptDto {
   @IsNumberString()
   dateTime: string;
 
-  @IsDefined()
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
   qrCodeURL: string;

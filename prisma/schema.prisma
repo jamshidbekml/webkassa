@@ -160,10 +160,10 @@ model ContractProducts {
 model Receipts {
   id                String            @id @default(uuid()) @db.Uuid
   terminalId        String
-  receiptSeq        String
-  fiscalSign        String
+  receiptSeq        String?
+  fiscalSign        String?
   dateTime          String
-  qrCodeURL         String
+  qrCodeURL         String?
   companyName       String
   companyAddress    String
   companyINN        String
