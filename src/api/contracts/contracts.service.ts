@@ -10,6 +10,7 @@ import { getContractProductsFromSat } from '../shared/utils/get-contract-product
 import { getContractGraphFromSat } from '../shared/utils/get-contract-graph';
 import { v4 as uuidv4 } from 'uuid';
 import { searchContractssFromSat } from '../shared/utils/search-contracts';
+import { checkIsOldContract } from '../shared/utils/chekc-is-old-contract';
 
 @Injectable()
 export class ContractsService {
@@ -281,6 +282,11 @@ export class ContractsService {
       take: limit,
     });
 
+    const contractsWithOldContract = contracts.map((contract) => ({
+      ...contract,
+      oldContract: false,
+    }));
+
     if (search && contracts.length < limit) {
       const additionalContracts = await searchContractssFromSat(
         prefix,
@@ -290,7 +296,7 @@ export class ContractsService {
 
       if (additionalContracts.length !== 0)
         for await (const contract of additionalContracts) {
-          contracts.push({
+          contractsWithOldContract.push({
             closed: contract.yopildi,
             contractId: contract.shraqam,
             createdAt: new Date(contract.sana),
@@ -300,10 +306,16 @@ export class ContractsService {
             pinfl: contract.pnfl,
             secondPhone: contract.phone2,
             clientFullName: contract.fio,
+            oldContract: checkIsOldContract(contract.inn),
           });
         }
     }
-    return { data: contracts, pageSize: limit, total, current: page };
+    return {
+      data: contractsWithOldContract,
+      pageSize: limit,
+      total,
+      current: page,
+    };
   }
 
   async findOne(id: string, userId: string) {

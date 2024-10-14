@@ -22,6 +22,7 @@ export async function searchContractssFromSat(
         shraqam: string;
         yopildi: boolean;
         sana: string;
+        inn: string;
       }[];
     }>(
       `${config.get('SAT_URL')}/api/v1/clients/search?branch=${branch}&limit=${limit}&search=${search}`,
