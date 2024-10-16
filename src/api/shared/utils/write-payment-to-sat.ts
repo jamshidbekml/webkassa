@@ -26,7 +26,7 @@ export async function writeTransactionToSat(payload: {
       },
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Basic ${token}`,
         },
       },
     );
