@@ -7,6 +7,7 @@ export async function writeTransactionToSat(payload: {
   receivedCash: number;
   userId: number;
   user: string;
+  comment?: string;
 }) {
   try {
     const config = new ConfigService();
@@ -23,6 +24,9 @@ export async function writeTransactionToSat(payload: {
         shraqam: payload.contractid,
         naqd: payload.receivedCash,
         plastik: payload.receivedCard,
+        userid: payload.userId,
+        user: payload.user,
+        comment: payload.comment || '',
       },
       {
         headers: {
