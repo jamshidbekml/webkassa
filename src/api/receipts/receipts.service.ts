@@ -155,7 +155,7 @@ export class ReceiptsService {
           receivedCard: +createReceiptDto.card / 100,
           receivedCash: +createReceiptDto.cash / 100,
           contractid: receipt.contractId,
-          user: `${user.firstName} ${user.lastName} ${user.middleName}`,
+          user: `${user.firstName} ${user.lastName} ${user.middleName}`.trim(),
           userId: user.satId,
         });
 
@@ -308,7 +308,7 @@ export class ReceiptsService {
       receivedCard: +receipt.card / 100,
       receivedCash: +receipt.cash / 100,
       contractid: receipt.contractId,
-      user: `${user.firstName} ${user.lastName} ${user.middleName}`,
+      user: `${user.firstName} ${user.lastName} ${user.middleName}`.trim(),
       userId: user.satId,
     });
 
