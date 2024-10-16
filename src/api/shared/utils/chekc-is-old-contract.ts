@@ -1,11 +1,4 @@
-const oldContracts = [
-  '311020705',
-  '311019919',
-  '311020150',
-  '311020602',
-  '311020705',
-  '311020602',
-];
+const oldContracts = ['302476158', '306912704', '303280251', '305756147'];
 
 export function checkIsOldContract(inn: string) {
   return oldContracts.includes(inn);
