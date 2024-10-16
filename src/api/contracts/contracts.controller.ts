@@ -9,6 +9,7 @@ import {
   GetContractGraph,
   GetContractProducts,
   GetContracts,
+  GetOldContract,
 } from './docorators/contract.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
@@ -42,6 +43,13 @@ export class ContractsController {
       search,
       prefix,
     );
+  }
+
+  @GetOldContract('old/:id')
+  findOldContract(@Req() req: Request, @Param('id') id: string) {
+    const { sub } = req['user'] as { sub: string };
+
+    return this.contractsService.findOldContract(id, sub);
   }
 
   @GetContract(':id')

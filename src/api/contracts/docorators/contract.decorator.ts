@@ -55,6 +55,14 @@ export function GetContract(routeName?: string) {
   );
 }
 
+export function GetOldContract(routeName?: string) {
+  return applyDecorators(
+    ApiOperation({ summary: 'Find Old Contract' }),
+    ApiParam({ name: 'id', type: 'string', description: 'SHARTNOMA RAQAMI' }),
+    Get(routeName),
+  );
+}
+
 export function DeleteContract(routeName?: string) {
   return applyDecorators(
     ApiOperation({ summary: 'Delete Contract' }),

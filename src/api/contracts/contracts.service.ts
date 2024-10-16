@@ -451,6 +451,48 @@ export class ContractsService {
     }
   }
 
+  async findOldContract(contractId: string, userId: string) {
+    try {
+      const { client } = await getContractProductsFromSat(contractId);
+
+      if (!client) throw new NotFoundException('Shartnoma topilmadi');
+
+      const user = await this.prismaService.users.findUnique({
+        where: { id: userId },
+      });
+
+      const graph = await this.getContractGraph(contractId);
+
+      const receipts = await this.prismaService.receipts.findMany({
+        where: {
+          contractId,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      return {
+        data: {
+          id: uuidv4(),
+          secondPhone: client.tel2,
+          passportSeries: client.passport,
+          pinfl: client.pnfl,
+          staffName: user.firstName + ' ' + user.lastName,
+          phoneNumber: client.tel1,
+          paycheckNumber: contractId,
+          clientName: client.fio,
+          receipt: receipts,
+          graph: graph.data,
+          payments: graph.payments,
+          previous: receipts.length ? true : false,
+        },
+      };
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
   async remove(id: string) {
     try {
       const contract = await this.prismaService.contracts.findUnique({
