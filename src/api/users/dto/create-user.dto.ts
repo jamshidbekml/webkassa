@@ -5,6 +5,7 @@ import {
   IsString,
   IsEnum,
   IsOptional,
+  IsNumber,
 } from 'class-validator';
 import { ROLE } from '@prisma/client';
 
@@ -57,4 +58,10 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
   branchId: string;
+
+  @ApiProperty({ description: `Field to enter user's sat ID` })
+  @IsDefined()
+  @IsNotEmpty()
+  @IsNumber()
+  satId: number;
 }

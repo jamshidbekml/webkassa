@@ -283,4 +283,49 @@ export class ReceiptsService {
     if (!receipt) throw new BadRequestException('Bunday chek topilmadi');
     return { data: receipt };
   }
+
+  async writePaymentSync(id: string, userId: string) {
+    const receipt = await this.prismaService.receipts.findUnique({
+      where: { id },
+    });
+
+    if (receipt.written || receipt.type === 'sale')
+      throw new BadRequestException(
+        "To'lov allaqachon yozilgan yoki bu chekni yoza olmaysiz!",
+      );
+
+    let user = await this.prismaService.users.findUnique({
+      where: { id: receipt.cashierId },
+    });
+
+    if (!user.satId) {
+      user = await this.prismaService.users.findUnique({
+        where: { id: userId },
+      });
+    }
+
+    const written = await writeTransactionToSat({
+      receivedCard: +receipt.card / 100,
+      receivedCash: +receipt.cash / 100,
+      contractid: receipt.contractId,
+      user: `${user.firstName} ${user.lastName} ${user.middleName}`,
+      userId: user.satId,
+    });
+
+    if (!written)
+      throw new Error(
+        "SATga yozib bo'lmadi. To'lovni qayta yuborishni unutmang!",
+      );
+
+    await this.prismaService.receipts.update({
+      where: {
+        id: receipt.id,
+      },
+      data: {
+        written: true,
+      },
+    });
+
+    return "To'lov yozildi";
+  }
 }

@@ -34,6 +34,7 @@ export class UsersService {
         role: true,
         createdAt: true,
         updatedAt: true,
+        satId: true,
       },
     });
 
@@ -69,6 +70,7 @@ export class UsersService {
         createdAt: true,
         updatedAt: true,
         refreshToken: true,
+        satId: true,
       },
     });
 
@@ -108,6 +110,7 @@ export class UsersService {
         updatedAt: true,
         role: true,
         branch: true,
+        satId: true,
       },
     });
 
@@ -171,6 +174,7 @@ export class UsersService {
             name: true,
           },
         },
+        satId: true,
       },
     });
 

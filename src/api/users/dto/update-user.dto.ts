@@ -1,6 +1,12 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateUserDto } from './create-user.dto';
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ROLE } from '@prisma/client';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
@@ -51,4 +57,10 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsNotEmpty()
   @IsString()
   branchId?: string;
+
+  @ApiProperty({ description: `Field to enter user's sat ID` })
+  @IsOptional()
+  @IsNotEmpty()
+  @IsNumber()
+  satId?: number;
 }

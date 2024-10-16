@@ -6,6 +6,7 @@ import {
   CreateReceipt,
   GetAllReceipts,
   GetReceipt,
+  WritePaymentSync,
 } from './decorators/receipts.decorator';
 import { RECEIPT_TYPE } from '@prisma/client';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -43,6 +44,12 @@ export class ReceiptsController {
       from,
       to,
     );
+  }
+
+  @WritePaymentSync('write/:id')
+  writePaymentSync(@Req() req: Request, @Param('id') id: string) {
+    const { sub } = req['user'] as { sub: string };
+    return this.receiptsService.writePaymentSync(id, sub);
   }
 
   @GetReceipt(':id')

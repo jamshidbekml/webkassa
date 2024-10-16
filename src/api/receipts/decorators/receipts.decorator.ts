@@ -86,6 +86,14 @@ export function GetReceipt(routeName?: string) {
   );
 }
 
+export function WritePaymentSync(routeName?: string) {
+  return applyDecorators(
+    ApiOperation({ summary: 'Write payment to sat' }),
+    ApiParam({ name: 'id', type: 'string', description: 'Chek id' }),
+    Get(routeName),
+  );
+}
+
 export function AddPayment(routeName?: string) {
   return applyDecorators(
     ApiOperation({ summary: 'Add payment' }),

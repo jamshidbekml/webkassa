@@ -61,4 +61,7 @@ export class GetMeDto {
     },
   )
   branch: any;
+
+  @Expose()
+  satId: number;
 }
