@@ -8,6 +8,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RECEIPT_TYPE } from '@prisma/client';
 import { writeTransactionToSat } from '../shared/utils/write-payment-to-sat';
 import { isUUID } from '../shared/utils/uuid-checker';
+import { getContractGraphFromSat } from '../shared/utils/get-contract-graph';
+import { checkIsOldContract } from '../shared/utils/chekc-is-old-contract';
+import { getSatPayments } from '../shared/utils/get-sat-payments';
+import { RefundReceiptDto } from './dto/update-receipt.dto';
 
 @Injectable()
 export class ReceiptsService {
@@ -29,12 +33,19 @@ export class ReceiptsService {
         });
 
         if (!contract) {
+          const satContract = await getContractGraphFromSat(
+            createReceiptDto.contractId,
+          );
+
+          if (!satContract)
+            throw new BadRequestException('Shartnoma SATdan topilmadi');
+
           const receipt = await prisma.receipts.create({
             data: {
               cashierId: userId,
               branchId,
               contractId: createReceiptDto.contractId,
-              type: 'sale',
+              type: checkIsOldContract(satContract.inn) ? 'sale' : 'credit',
               receiptSeq: createReceiptDto.receiptSeq,
               dateTime: createReceiptDto.dateTime,
               fiscalSign: createReceiptDto.fiscalSign,
@@ -172,6 +183,34 @@ export class ReceiptsService {
             written: true,
           },
         });
+      } else {
+        const contract = await this.prismaService.contracts.findUnique({
+          where: { contractId: createReceiptDto.contractId },
+        });
+
+        if (!contract) {
+          const written = await writeTransactionToSat({
+            receivedCard: +createReceiptDto.card / 100,
+            receivedCash: +createReceiptDto.cash / 100,
+            contractid: receipt.contractId,
+            user: `${user.firstName} ${user.lastName} ${user.middleName}`.trim(),
+            userId: user.satId,
+          });
+
+          if (!written)
+            throw new Error(
+              "SATga yozib bo'lmadi. To'lovni qayta yuborishni unutmang!",
+            );
+
+          await this.prismaService.receipts.update({
+            where: {
+              id: receipt.id,
+            },
+            data: {
+              written: true,
+            },
+          });
+        }
       }
 
       return { data: receipt };
@@ -327,5 +366,78 @@ export class ReceiptsService {
     });
 
     return "To'lov yozildi";
+  }
+
+  async getSatPayments(prefix: string) {
+    return await getSatPayments(prefix);
+  }
+
+  async refund(body: RefundReceiptDto, userId: string) {
+    const user = await this.prismaService.users.findUnique({
+      where: { id: userId },
+    });
+
+    const written = await writeTransactionToSat({
+      receivedCard: body.card,
+      receivedCash: body.cash,
+      contractid: body.contractId,
+      user: `${user.firstName} ${user.lastName} ${user.middleName}`.trim(),
+      userId: user.satId,
+      comment: body.extraInfo,
+      boshqa_id: body.paymentId,
+    });
+
+    if (!written)
+      throw new Error(
+        "SATga yozib bo'lmadi. To'lovni qayta yuborishni unutmang!",
+      );
+
+    const contract = await this.prismaService.contracts.findUnique({
+      where: { contractId: body.contractId },
+      include: {
+        products: true,
+      },
+    });
+
+    if (contract) {
+      await this.prismaService.$transaction(async (prisma) => {
+        for await (const product of contract.products) {
+          try {
+            await prisma.products.update({
+              where: { id: product.productId },
+              data: {
+                count: { increment: product.count },
+              },
+            });
+
+            if (product.label) {
+              await prisma.productMarks.update({
+                where: { label: product.label },
+                data: {
+                  sold: false,
+                },
+              });
+            }
+          } catch (err) {
+            continue;
+          }
+        }
+      });
+
+      const receipt = await this.prismaService.receipts.findFirst({
+        where: { contractId: body.contractId, type: 'sale' },
+      });
+
+      if (receipt) {
+        await this.prismaService.receipts.update({
+          where: { id: receipt.id },
+          data: {
+            type: 'refund',
+          },
+        });
+      }
+    }
+
+    return 'To`lov qaytarildi';
   }
 }

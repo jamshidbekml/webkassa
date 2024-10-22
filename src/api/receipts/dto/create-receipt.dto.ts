@@ -65,7 +65,6 @@ class ProductDto {
   @IsString()
   label?: string;
 }
-
 export class CreateReceiptDto {
   @IsDefined()
   @IsNotEmpty()

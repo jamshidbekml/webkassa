@@ -1,6 +1,7 @@
 import { applyDecorators, Get, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { RECEIPT_TYPE } from '@prisma/client';
+import { RefundReceiptDto } from '../dto/update-receipt.dto';
 
 export function CreateReceipt(routeName?: string) {
   return applyDecorators(
@@ -83,6 +84,21 @@ export function GetReceipt(routeName?: string) {
     ApiOperation({ summary: 'Find receipt' }),
     ApiParam({ name: 'id', type: 'string' }),
     Get(routeName),
+  );
+}
+
+export function GetPaymentTypes(routeName?: string) {
+  return applyDecorators(
+    ApiOperation({ summary: 'Get payment types' }),
+    Get(routeName),
+  );
+}
+
+export function RefundReceipt(routeName?: string) {
+  return applyDecorators(
+    ApiOperation({ summary: 'Refund receipt' }),
+    ApiBody({ type: RefundReceiptDto }),
+    Post(routeName),
   );
 }
 

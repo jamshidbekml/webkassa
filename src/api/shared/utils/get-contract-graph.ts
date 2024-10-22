@@ -11,6 +11,7 @@ export async function getContractGraphFromSat(contractId: string) {
 
     const { data } = await axios.get<{
       data: {
+        inn: string;
         grafik: {
           nomer: number;
           sana: string;

@@ -5,11 +5,14 @@ import { Request } from 'express';
 import {
   CreateReceipt,
   GetAllReceipts,
+  GetPaymentTypes,
   GetReceipt,
+  RefundReceipt,
   WritePaymentSync,
 } from './decorators/receipts.decorator';
 import { RECEIPT_TYPE } from '@prisma/client';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { RefundReceiptDto } from './dto/update-receipt.dto';
 
 @ApiBearerAuth()
 @ApiTags('receipts')
@@ -44,6 +47,20 @@ export class ReceiptsController {
       from,
       to,
     );
+  }
+
+  @GetPaymentTypes('payment-types')
+  getPaymentTypes(@Req() req: Request) {
+    const { prefix } = req['user'] as { prefix: string };
+
+    return this.receiptsService.getSatPayments(prefix);
+  }
+
+  @RefundReceipt('refund')
+  refund(@Body() body: RefundReceiptDto, @Req() req: Request) {
+    const { sub } = req['user'] as { sub: string };
+
+    return this.receiptsService.refund(body, sub);
   }
 
   @WritePaymentSync('write/:id')
