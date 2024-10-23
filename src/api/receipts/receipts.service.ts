@@ -369,7 +369,11 @@ export class ReceiptsService {
   }
 
   async getSatPayments(prefix: string) {
-    return await getSatPayments(prefix);
+    try {
+      return await getSatPayments(prefix);
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
   }
 
   async refund(body: RefundReceiptDto, userId: string) {
