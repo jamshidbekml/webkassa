@@ -210,6 +210,39 @@ export class ReceiptsService {
               written: true,
             },
           });
+        } else {
+          const satContract = await getContractGraphFromSat(
+            createReceiptDto.contractId,
+          );
+
+          if (!satContract)
+            throw new InternalServerErrorException(
+              "Shartnomani SATdan olib bo'lmadi",
+            );
+
+          if (satContract.grafik.length <= 1) {
+            const written = await writeTransactionToSat({
+              receivedCard: +createReceiptDto.card / 100,
+              receivedCash: +createReceiptDto.cash / 100,
+              contractid: receipt.contractId,
+              user: `${user.firstName} ${user.lastName} ${user.middleName}`.trim(),
+              userId: user.satId,
+            });
+
+            if (!written)
+              throw new Error(
+                "SATga yozib bo'lmadi. To'lovni qayta yuborishni unutmang!",
+              );
+
+            await this.prismaService.receipts.update({
+              where: {
+                id: receipt.id,
+              },
+              data: {
+                written: true,
+              },
+            });
+          }
         }
       }
 
