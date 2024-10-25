@@ -24,6 +24,7 @@ export async function getOneDocument(inn: string, doc_id: string) {
 
     return data.data;
   } catch (err) {
+    console.log(err);
     throw new BadRequestException(
       `ERROR ON GET ONE DIDOX DOCUMENT: ${err.message}`,
     );

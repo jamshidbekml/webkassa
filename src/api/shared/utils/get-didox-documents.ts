@@ -23,6 +23,7 @@ export async function getDidoxDocuments(inn: string, page: number) {
 
     return data.data;
   } catch (err) {
+    console.log(err);
     throw new BadRequestException(
       `ERROR ON GET DIDOX DOCUMENTS: ${err.message}`,
     );
