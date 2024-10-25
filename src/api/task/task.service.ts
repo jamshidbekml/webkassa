@@ -12,7 +12,7 @@ export class TaskService implements OnModuleInit {
     this.tokenUpdater();
   }
 
-  @Cron(CronExpression.EVERY_3_HOURS)
+  @Cron(CronExpression.EVERY_MINUTE)
   async tokenUpdater() {
     try {
       const warehouses = await this.prismaService.branches.findMany();

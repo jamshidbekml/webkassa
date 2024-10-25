@@ -19,7 +19,6 @@ export async function getDidoxDocuments(inn: string, page: number) {
         },
       },
     );
-    console.log(data);
 
     return data.data;
   } catch (err) {
