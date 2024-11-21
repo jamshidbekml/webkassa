@@ -425,7 +425,7 @@ export class ReceiptsService {
     });
 
     if (!written)
-      throw new Error(
+      throw new InternalServerErrorException(
         "SATga yozib bo'lmadi. To'lovni qayta yuborishni unutmang!",
       );
 
