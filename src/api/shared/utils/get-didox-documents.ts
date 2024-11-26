@@ -2,11 +2,15 @@ import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { GetAllDocumentsFromDidox } from '../interfaces/didox.interface';
 import { BadRequestException } from '@nestjs/common';
+import { PrismaService } from 'src/api/prisma/prisma.service';
 
 export async function getDidoxDocuments(inn: string, page: number) {
   try {
     const configService = new ConfigService();
-    const user_key = configService.get(inn);
+    const prismaService = new PrismaService();
+    const user_key = await prismaService.tokens
+      .findUnique({ where: { inn } })
+      .then((res) => res.token);
 
     const partnet_token = configService.get('DIDOX_TOKEN');
 

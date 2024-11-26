@@ -10,7 +10,6 @@ export async function getDidoxToken(inn: string, password: string) {
         password,
       },
     );
-    console.log(token);
 
     return token;
   } catch (err) {

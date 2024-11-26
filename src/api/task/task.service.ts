@@ -24,31 +24,29 @@ export class TaskService implements OnModuleInit {
         tokens[warehouse.inn] = token;
       }
 
-      const envFilePath = join(__dirname, '..', '..', '..', '..', '.env');
-
-      let data = await fs.readFile(envFilePath, 'utf8');
-
       for (const token in tokens) {
-        const keyExists = data
-          .split('\n')
-          .some((line) => line.startsWith(`${token}=`));
+        const existingToken = await this.prismaService.tokens.findUnique({
+          where: { inn: token },
+        });
 
-        if (keyExists) {
-          data = data
-            .split('\n')
-            .map((line) => {
-              if (line.startsWith(`${token}=`)) {
-                return `${token}=${tokens[token]}`;
-              }
-              return line;
-            })
-            .join('\n');
+        if (existingToken) {
+          await this.prismaService.tokens.update({
+            where: {
+              id: existingToken.id,
+            },
+            data: {
+              token: tokens[token],
+            },
+          });
         } else {
-          data = `${data}\n${token}=${tokens[token]}`;
+          await this.prismaService.tokens.create({
+            data: {
+              inn: token,
+              token: tokens[token],
+            },
+          });
         }
       }
-
-      await fs.writeFile(envFilePath, data);
     } catch (err) {
       console.log(err.message);
     }
